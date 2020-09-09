@@ -52,11 +52,32 @@ class read_serial(object):
                 self.cap_data.append([])
             else:
                 self.cap_data[taxel].append(cap_value)
+
+def crop(all_data):
     
+    data_delta=np.zeros(shape=all_data.shape)
+    for j in range(all_data.shape[1]-1):
+        data_delta[:,j-1]=all_data[:,j-1]-np.mean(all_data[:1,j-1])
+        
+    data_ac=np.array([])
+    data_crop=np.zeros(shape=(1,17))
+    
+    for k in range(data_delta.shape[0]):
+        for l in range(data_delta.shape[1]):
+           # if total_data_delta[k,l]>0.05 and np.count_nonzero(data_ac == k)==0:
+            if  data_delta[k,l]>0.05:
+                data_crop=np.vstack((data_crop,all_data[k,:].reshape(1,-1)))
+                data_ac=np.append(data_ac,k)
+                break
+    return data_crop[1:,:]
+
 
 baseline='/Users/saquib/Desktop/4X4_CNN/baseline.0'
 line='/Users/saquib/Desktop/4X4_CNN/line.0'
 triangle='/Users/saquib/Desktop/4X4_CNN/triangle.0'
+line_test='/Users/saquib/Desktop/4X4_CNN/line_test.0'
+triangle_test='/Users/saquib/Desktop/4X4_CNN/triangle_test.0'
+
 
 X_base=read_serial()
 X_base.read_data(baseline)
@@ -69,6 +90,33 @@ data_line=np.array(X_line.cap_data)
 X_triangle=read_serial()
 X_triangle.read_data(triangle)
 data_triangle=np.array(X_triangle.cap_data)
+
+
+#-----------------------------------------------#
+#this segment is for test data only
+#-----------------------------------------------#
+
+X_line_test=read_serial()
+X_line_test.read_data(line_test)
+data_line_test=np.array(X_line_test.cap_data)
+
+y_line_test=np.ones(data_line_test.shape[1])
+data_line_test_t=np.transpose(data_line_test)
+total_line_test=np.hstack((data_line_test_t,(y_line_test.reshape(-1,1))))
+line_test_crop=crop(total_line_test)
+
+X_triangle_test=read_serial()
+X_triangle_test.read_data(triangle_test)
+data_triangle_test=np.array(X_triangle_test.cap_data)
+
+y_triangle_test=2*np.ones(data_triangle_test.shape[1])
+data_triangle_test_t=np.transpose(data_triangle_test)
+total_triangle_test=np.hstack((data_triangle_test_t,(y_triangle_test.reshape(-1,1))))
+triangle_test_crop=crop(total_triangle_test)
+
+test_data=np.vstack((line_test_crop,triangle_test_crop))
+
+#------------------------------------------------#
 
 data=np.append(data_base,data_line,axis=1)
 data=np.append(data,data_triangle, axis=1)
@@ -149,6 +197,25 @@ y=X_with_base[:,16]
 
 y_all = to_categorical(y)
 
+#--------------------------------#
+
+#adding test data of M
+
+X_with_M=np.vstack((X,test_data[:,:16]))
+y_M_cat=to_categorical(test_data[:,16])
+y_with_M=np.vstack((y_all,y_M_cat))
+
+
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+         X_with_M, y_with_M, test_size=0.3, random_state=1)
+
+
+#--------------------------------#
+
+
+
 X_train, X_test, y_train, y_test = train_test_split(
          X, y_all, test_size=0.3, random_state=1)
 #
@@ -199,6 +266,29 @@ for i in range(X_test.shape[0]):
     data2D_test[i,3,1]=X_test[i,8]
     data2D_test[i,3,2]=X_test[i,11]
     data2D_test[i,3,3]=X_test[i,10]
+    
+    
+
+
+data2D_test_M=np.zeros(shape=(test_data.shape[0],4,4))
+#mapping for 4X4 board 3mm with arduino mega
+for i in range(test_data.shape[0]):
+    data2D_test_M[i,0,0]=test_data[i,5]
+    data2D_test_M[i,0,1]=test_data[i,4]
+    data2D_test_M[i,0,2]=test_data[i,7]
+    data2D_test_M[i,0,3]=test_data[i,6]
+    data2D_test_M[i,1,0]=test_data[i,1]
+    data2D_test_M[i,1,1]=test_data[i,0]
+    data2D_test_M[i,1,2]=test_data[i,3]
+    data2D_test_M[i,1,3]=test_data[i,2]
+    data2D_test_M[i,2,0]=test_data[i,13]
+    data2D_test_M[i,2,1]=test_data[i,12]
+    data2D_test_M[i,2,2]=test_data[i,15]
+    data2D_test_M[i,2,3]=test_data[i,14]
+    data2D_test_M[i,3,0]=test_data[i,9]
+    data2D_test_M[i,3,1]=test_data[i,8]
+    data2D_test_M[i,3,2]=test_data[i,11]
+    data2D_test_M[i,3,3]=test_data[i,10]
     
     
     
@@ -346,6 +436,17 @@ plt.legend()
 plt.show()
 
 
+
+y_test_M = to_categorical(test_data[:,16])
+scores=model.evaluate(data2D_test_M.reshape(data2D_test_M.shape[0],4,4,1),y_test_M,verbose=1)
+
+
+
+#-------------------------------------------------------#
+
+#This segment is for real time recognition
+
+#-------------------------------------------------------#
 
 
 strPort = '/dev/cu.usbmodem143101'
