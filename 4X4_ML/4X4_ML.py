@@ -45,39 +45,43 @@ class read_serial(object):
             else:
                 self.cap_data[taxel].append(cap_value)
        
-
 #adding multiple files to read in pressure shear and baseline data
-
-path_base='/Users/saquib/Desktop/4X4/baseline.0'
-path_pressure='/Users/saquib/Desktop/4X4/pressure.0'
+                
+path_base='/Users/saquib/Documents/Research/HRI/HRI_Python/4X4_ML/baseline.0'
+#path_pressure='/Users/saquib/Documents/Research/HRI/HRI_Python/4X4_ML/pressure.0'
 #path_shear='/Users/saquib/Desktop/ML/shear.0'
-path_prox='/Users/saquib/Desktop/4X4/proximity.0'
-path_touch='/Users/saquib/Desktop/4X4/touch.0'
+path_prox='/Users/saquib/Documents/Research/HRI/HRI_Python/4X4_ML/proximity.0'
+path_touch='/Users/saquib/Documents/Research/HRI/HRI_Python/4X4_ML/touch.0'
 
 X_base=read_serial()
-X_pressure=read_serial()
+#X_pressure=read_serial()
 #X_shear=read_serial()
 X_prox=read_serial()
 X_touch=read_serial()
 
 X_base.read_data(path_base)
-X_pressure.read_data(path_pressure)
+#X_pressure.read_data(path_pressure)
 #X_shear.read_data(path_shear)
 X_prox.read_data(path_prox)
 X_touch.read_data(path_touch)
 
 base_data=np.array(np.transpose(X_base.cap_data))
-pressure_data=np.array(np.transpose(X_pressure.cap_data))
+#pressure_data=np.array(np.transpose(X_pressure.cap_data))
 #shear_data=np.array(np.transpose(X_shear.cap_data))
 prox_data=np.array(np.transpose(X_prox.cap_data))
 touch_data=np.array(np.transpose(X_touch.cap_data))
 
+for j in range(16):
+    plt.plot(prox_data[:,j])
+
+
+
 Y_base=np.empty(len(base_data),dtype='int')
 for i in range(0,len(base_data)):
     Y_base[i]=0
-Y_pressure=np.empty(len(pressure_data),dtype='int')
-for i in range(0,len(pressure_data)):
-    Y_pressure[i]=1
+#Y_pressure=np.empty(len(pressure_data),dtype='int')
+#for i in range(0,len(pressure_data)):
+#    Y_pressure[i]=1
 # Y_shear=np.empty(len(shear_data),dtype='int')
 # for i in range(0,len(shear_data)):
 #     Y_shear[i]=2
@@ -89,14 +93,16 @@ for i in range(0,len(touch_data)):
     Y_touch[i]=3
     
     
-X=np.append(base_data,pressure_data,axis=0)
+#X=np.append(base_data,pressure_data,axis=0)
 # X=np.append(X,shear_data,axis=0)
-X=np.append(X,prox_data,axis=0)
+X=np.append(base_data,prox_data,axis=0) #use this if there is no pressure data
+#X=np.append(X,prox_data,axis=0) #use this if there is pressure data
 X=np.append(X,touch_data,axis=0)
 
-y=np.append(Y_base,Y_pressure,axis=0)
+#y=np.append(Y_base,Y_pressure,axis=0)
 # y=np.append(y,Y_shear,axis=0)
-y=np.append(y,Y_prox,axis=0)
+y=np.append(Y_base,Y_prox,axis=0) #use this if there is no pressure data
+#y=np.append(y,Y_prox,axis=0) #use this if there is pressure data
 y=np.append(y,Y_touch,axis=0)
 
 X_train,X_test,y_train,y_test= train_test_split(X,y, test_size=0.3, stratify=y)
@@ -107,6 +113,7 @@ X_train,X_test,y_train,y_test= train_test_split(X,y, test_size=0.3, stratify=y)
 ##---------------------------------
 
 from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
 svc = SVC(C=100, kernel='rbf', gamma = 100, 
           class_weight='balanced')
 
@@ -120,9 +127,11 @@ search = GridSearchCV(estimator=svc,
                       cv=5)
 search.fit(X_train,y_train)
 
-clf = SVC(C=100, kernel='rbf', gamma = 100, 
+clf = SVC(C=10, kernel='rbf', gamma = 100, 
           class_weight='balanced')
 clf.fit(X_train,y_train)
+acc=clf.score(X_test,y_test) #using clf.score
+#acc=accuracy_score(y_test, clf.predict(X_test)) #using accuracy_score from sklearn
 
 #----------------------------
 #Random Forest classifier
@@ -173,7 +182,7 @@ clf.fit(X_train,y_train)
 
 import time
 
-strPort = '/dev/cu.usbmodem144101'
+strPort = '/dev/cu.usbmodem143101'
 ser = serial.Serial(strPort, baudrate=9600)
 cnt=0
 stat=np.zeros((16),dtype='float')
@@ -223,8 +232,8 @@ while True:
             #print(stat)
             if clf.predict(stat.reshape(1,16))==0:
                 print('baseline')
-            elif clf.predict(stat.reshape(1,16))==1:
-                print('pressure')
+#            elif clf.predict(stat.reshape(1,16))==1:
+#                print('pressure')
             elif clf.predict(stat.reshape(1,16))==2:
                 print('proximity')
             # elif clf.predict(stat.reshape(1,16))==3:
@@ -244,6 +253,11 @@ while True:
 pa='/Users/saquib/Desktop/screenlog.0'
 X_single=read_serial()
 X_single.read_data(pa)
+
+single_data=np.array(np.transpose(X_single.cap_data))
+
+for i in range(16):
+    plt.plot(single_data[:,i])
 
 c_data_np=np.array(np.transpose(X_single.cap_data))
 time=np.linspace(0,len(c_data_np)-1,len(c_data_np))
