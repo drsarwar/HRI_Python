@@ -80,6 +80,13 @@ def crop(all_data):
                 break
     return data_crop[1:,:]
 
+
+#-------------------------
+#
+#Function to convert 1D data into 2D 4X4 array according to the PCB
+#    
+#------------------------
+
 def conv4x4(input_data):
     
     data2D=np.zeros(shape=(input_data.shape[0],4,4))
@@ -289,24 +296,6 @@ y=total_data[:,16]
 
 y_all = to_categorical(y)
 
-#--------------------------------#
-
-#adding test data of M
-
-#X_with_M=np.vstack((X,test_data[:,:16]))
-#y_M_cat=to_categorical(test_data[:,16])
-#y_with_M=np.vstack((y_all,y_M_cat))
-#
-#
-#
-#
-#X_train, X_test, y_train, y_test = train_test_split(
-#         X_with_M, y_with_M, test_size=0.3, random_state=1)
-#
-
-#--------------------------------#
-
-
 
 X_train, X_test, y_train, y_test = train_test_split(
          X, y_all, test_size=0.1, random_state=1, stratify=y)
@@ -316,165 +305,12 @@ X_train, X_test, y_train, y_test = train_test_split(
 #    
 
 
-new_data_2D_train=conv4x4(X_train)
+data2D_train=conv4x4(X_train)
 
-data2D_train=np.zeros(shape=(X_train.shape[0],4,4))
-#mapping for 4X4 board 3mm with arduino mega
-for i in range(X_train.shape[0]):
-    data2D_train[i,0,0]=X_train[i,5]
-    data2D_train[i,0,1]=X_train[i,4]
-    data2D_train[i,0,2]=X_train[i,7]
-    data2D_train[i,0,3]=X_train[i,6]
-    data2D_train[i,1,0]=X_train[i,1]
-    data2D_train[i,1,1]=X_train[i,0]
-    data2D_train[i,1,2]=X_train[i,3]
-    data2D_train[i,1,3]=X_train[i,2]
-    data2D_train[i,2,0]=X_train[i,13]
-    data2D_train[i,2,1]=X_train[i,12]
-    data2D_train[i,2,2]=X_train[i,15]
-    data2D_train[i,2,3]=X_train[i,14]
-    data2D_train[i,3,0]=X_train[i,9]
-    data2D_train[i,3,1]=X_train[i,8]
-    data2D_train[i,3,2]=X_train[i,11]
-    data2D_train[i,3,3]=X_train[i,10]
+data2D_test=conv4x4(X_test)
 
+data2D_delta_test=conv4x4(test_data_delta)
 
-
-
-data2D_test=np.zeros(shape=(X_test.shape[0],4,4))
-#mapping for 4X4 board 3mm with arduino mega
-for i in range(X_test.shape[0]):
-    data2D_test[i,0,0]=X_test[i,5]
-    data2D_test[i,0,1]=X_test[i,4]
-    data2D_test[i,0,2]=X_test[i,7]
-    data2D_test[i,0,3]=X_test[i,6]
-    data2D_test[i,1,0]=X_test[i,1]
-    data2D_test[i,1,1]=X_test[i,0]
-    data2D_test[i,1,2]=X_test[i,3]
-    data2D_test[i,1,3]=X_test[i,2]
-    data2D_test[i,2,0]=X_test[i,13]
-    data2D_test[i,2,1]=X_test[i,12]
-    data2D_test[i,2,2]=X_test[i,15]
-    data2D_test[i,2,3]=X_test[i,14]
-    data2D_test[i,3,0]=X_test[i,9]
-    data2D_test[i,3,1]=X_test[i,8]
-    data2D_test[i,3,2]=X_test[i,11]
-    data2D_test[i,3,3]=X_test[i,10]
-    
-    
-
-    
-#can also do it this way
-#data2D[0,0,:]=data_t[:,5]
-#data2D[0,1,:]=data_t[:,4]
-#data2D[0,2,:]=data_t[:,7]
-#data2D[0,3,:]=data_t[:,6]
-#data2D[1,0,:]=data_t[:,1]
-#data2D[1,1,:]=data_t[:,0]
-#data2D[1,2,:]=data_t[:,3]
-#data2D[1,3,:]=data_t[:,2]
-#data2D[2,0,:]=data_t[:,13]
-#data2D[2,1,:]=data_t[:,12]
-#data2D[2,2,:]=data_t[:,15]
-#data2D[2,3,:]=data_t[:,14]
-#data2D[3,0,:]=data_t[:,9]
-#data2D[3,1,:]=data_t[:,8]
-#data2D[3,2,:]=data_t[:,11]
-#data2D[3,3,:]=data_t[:,10]
-
-#
-#
-
-
-#data2D_delta=np.zeros(shape=(data_delta.shape[0],4,4))
-##mapping for 4X4 board 3mm with arduino mega
-#for i in range(data_delta.shape[0]):
-#    data2D_delta[i,0,0]=data_delta[i,5]
-#    data2D_delta[i,0,1]=data_delta[i,4]
-#    data2D_delta[i,0,2]=data_delta[i,7]
-#    data2D_delta[i,0,3]=data_delta[i,6]
-#    data2D_delta[i,1,0]=data_delta[i,1]
-#    data2D_delta[i,1,1]=data_delta[i,0]
-#    data2D_delta[i,1,2]=data_delta[i,3]
-#    data2D_delta[i,1,3]=data_delta[i,2]
-#    data2D_delta[i,2,0]=data_delta[i,13]
-#    data2D_delta[i,2,1]=data_delta[i,12]
-#    data2D_delta[i,2,2]=data_delta[i,15]
-#    data2D_delta[i,2,3]=data_delta[i,14]
-#    data2D_delta[i,3,0]=data_delta[i,9]
-#    data2D_delta[i,3,1]=data_delta[i,8]
-#    data2D_delta[i,3,2]=data_delta[i,11]
-#    data2D_delta[i,3,3]=data_delta[i,10]
-#    
-#    
-
-
-data2D_delta_test=np.zeros(shape=(test_data_delta.shape[0],4,4))
-#mapping for 4X4 board 3mm with arduino mega
-for i in range(test_data_delta.shape[0]):
-    data2D_delta_test[i,0,0]=test_data_delta[i,5]
-    data2D_delta_test[i,0,1]=test_data_delta[i,4]
-    data2D_delta_test[i,0,2]=test_data_delta[i,7]
-    data2D_delta_test[i,0,3]=test_data_delta[i,6]
-    data2D_delta_test[i,1,0]=test_data_delta[i,1]
-    data2D_delta_test[i,1,1]=test_data_delta[i,0]
-    data2D_delta_test[i,1,2]=test_data_delta[i,3]
-    data2D_delta_test[i,1,3]=test_data_delta[i,2]
-    data2D_delta_test[i,2,0]=test_data_delta[i,13]
-    data2D_delta_test[i,2,1]=test_data_delta[i,12]
-    data2D_delta_test[i,2,2]=test_data_delta[i,15]
-    data2D_delta_test[i,2,3]=test_data_delta[i,14]
-    data2D_delta_test[i,3,0]=test_data_delta[i,9]
-    data2D_delta_test[i,3,1]=test_data_delta[i,8]
-    data2D_delta_test[i,3,2]=test_data_delta[i,11]
-    data2D_delta_test[i,3,3]=test_data_delta[i,10]
-    
-
-
-
-data2D_delta_test_scaled=np.zeros(shape=(test_data_delta_scaled.shape[0],4,4))
-#mapping for 4X4 board 3mm with arduino mega
-for i in range(test_data_delta_scaled.shape[0]):
-    data2D_delta_test_scaled[i,0,0]=test_data_delta_scaled[i,5]
-    data2D_delta_test_scaled[i,0,1]=test_data_delta_scaled[i,4]
-    data2D_delta_test_scaled[i,0,2]=test_data_delta_scaled[i,7]
-    data2D_delta_test_scaled[i,0,3]=test_data_delta_scaled[i,6]
-    data2D_delta_test_scaled[i,1,0]=test_data_delta_scaled[i,1]
-    data2D_delta_test_scaled[i,1,1]=test_data_delta_scaled[i,0]
-    data2D_delta_test_scaled[i,1,2]=test_data_delta_scaled[i,3]
-    data2D_delta_test_scaled[i,1,3]=test_data_delta_scaled[i,2]
-    data2D_delta_test_scaled[i,2,0]=test_data_delta_scaled[i,13]
-    data2D_delta_test_scaled[i,2,1]=test_data_delta_scaled[i,12]
-    data2D_delta_test_scaled[i,2,2]=test_data_delta_scaled[i,15]
-    data2D_delta_test_scaled[i,2,3]=test_data_delta_scaled[i,14]
-    data2D_delta_test_scaled[i,3,0]=test_data_delta_scaled[i,9]
-    data2D_delta_test_scaled[i,3,1]=test_data_delta_scaled[i,8]
-    data2D_delta_test_scaled[i,3,2]=test_data_delta_scaled[i,11]
-    data2D_delta_test_scaled[i,3,3]=test_data_delta_scaled[i,10]
-    
-    
-#
-#
-#
-#data2D_crop=np.zeros(shape=(4,4,data_t.shape[0]))
-##mapping for 4X4 board 3mm with arduino mega
-#for i in range(data_crop.shape[0]):
-#    data2D_crop[0,0,i]=data_crop[i,5]
-#    data2D_crop[0,1,i]=data_crop[i,4]
-#    data2D_crop[0,2,i]=data_crop[i,7]
-#    data2D_crop[0,3,i]=data_crop[i,6]
-#    data2D_crop[1,0,i]=data_crop[i,1]
-#    data2D_crop[1,1,i]=data_crop[i,0]
-#    data2D_crop[1,2,i]=data_crop[i,3]
-#    data2D_crop[1,3,i]=data_crop[i,2]
-#    data2D_crop[2,0,i]=data_crop[i,13]
-#    data2D_crop[2,1,i]=data_crop[i,12]
-#    data2D_crop[2,2,i]=data_crop[i,15]
-#    data2D_crop[2,3,i]=data_crop[i,14]
-#    data2D_crop[3,0,i]=data_crop[i,9]
-#    data2D_crop[3,1,i]=data_crop[i,8]
-#    data2D_crop[3,2,i]=data_crop[i,11]
-#    data2D_crop[3,3,i]=data_crop[i,10]
 
 
 
@@ -536,7 +372,7 @@ model.compile(optimizer='adam',
 #                  epochs=5,
 #                  validation_data = (data2D_test.reshape(data2D_test.shape[0],4,4,1), y_test))
 
-history=model.fit(data2D_train.reshape(new_data_2D_train.shape[0],4,4,1), y_train,
+history=model.fit(data2D_train.reshape(data2D_train.shape[0],4,4,1), y_train,
                   epochs=12,
                   validation_data = (data2D_delta_test.reshape(data2D_delta_test.shape[0],4,4,1), y_test_cat))
 
