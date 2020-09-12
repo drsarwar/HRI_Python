@@ -39,7 +39,6 @@ import sys, serial
 from keras.layers import BatchNormalization
 
 
-#adding some comment
 class read_serial(object):
     def __init__(self):
         self.complete_data=[[],[]]
@@ -82,9 +81,7 @@ def crop(all_data):
 
 
 #-------------------------
-#
 #Function to convert 1D data into 2D 4X4 array according to the PCB
-#    
 #------------------------
 
 def conv4x4(input_data):
@@ -132,9 +129,9 @@ X_touch=read_serial()
 X_touch.read_data(touch)
 data_touch=np.array(X_touch.cap_data)
 
-
-for i in range(16):
-    plt.plot(data_base[i,:])
+#
+#for i in range(16):
+#    plt.plot(data_base[i,:])
 
 #------------
 #appending base,prox and touch data
@@ -178,6 +175,7 @@ for j in range(data_t.shape[1]):
     data_delta[:,j]=data_t[:,j]-np.mean(data_t[:10,j])
 
 data_delta_scaled=-(data_delta-(0.001))/(0.001-(-0.05))
+
 #-----------------------------------------------#
 #this segment is for test data only
 #-----------------------------------------------#
@@ -186,34 +184,23 @@ X_proximity_test=read_serial()
 X_proximity_test.read_data(proximity_test)
 data_proximity_test=np.array(X_proximity_test.cap_data)
 
-y_proximity_test=np.ones(data_proximity_test.shape[1])
-
 data_proximity_test_t=np.transpose(data_proximity_test)
-total_proximity_test=np.hstack((data_proximity_test_t,(y_proximity_test.reshape(-1,1))))
-
 
 X_touch_test=read_serial()
 X_touch_test.read_data(touch_test)
 data_touch_test=np.array(X_touch_test.cap_data)
 
-y_touch_test=2*np.ones(data_touch_test.shape[1])
-
 data_touch_test_t=np.transpose(data_touch_test)
-total_touch_test=np.hstack((data_touch_test_t,(y_touch_test.reshape(-1,1))))
-
-total_test_data=np.vstack((total_proximity_test,total_touch_test))
-
 
 X_test_data=np.append(data_proximity_test,data_touch_test,axis=1)
 X_test_data=np.transpose(X_test_data)
-
 
 
 test_data_delta=np.zeros(shape=X_test_data.shape)
 for j in range(X_test_data.shape[1]):
     test_data_delta[:,j]=X_test_data[:,j]-np.mean(data_t[:10,j])
 
-test_data_delta_scaled=-(test_data_delta-(-0.001))/(0.001-(-0.05))
+#test_data_delta_scaled=-(test_data_delta-(-0.001))/(0.001-(-0.05))
 
 y_proximity_test=1*np.ones(data_proximity_test.shape[1])
 y_touch_test=2*np.ones(data_touch_test.shape[1])
@@ -223,70 +210,7 @@ y_test_cat=to_categorical(y_test)
 
 #------------------------------------------------#
 
-#total_data_delta = np.hstack((data_delta,(y.reshape(-1,1))))
 
-#plt.figure(2)
-#plt.plot(data[15,:])        
-#for i in range(16):
-#    plt.plot(data_delta[:,i],'o')    
-
-
-#to make dataset we only want to keep the parts of the 
-#data that correspond to a stimulus
-#succesful crop for any stimulus over 1% change
-
-#
-#
-#data_ac=np.array([])
-#data_crop=np.zeros(shape=(1,17))
-#
-#for k in range(total_data_delta.shape[0]):
-#    for l in range(total_data_delta.shape[1]-1):
-#       # if total_data_delta[k,l]>0.05 and np.count_nonzero(data_ac == k)==0:
-#        if total_data_delta[k,l]>0.05:
-#            data_crop=np.vstack((data_crop,total_data[k,:].reshape(1,-1)))
-#            data_ac=np.append(data_ac,k)
-#            break
-#            
-
-
-#added this part to keep the discarded data
-#
-#data_ac_base=np.array([])
-#data_discard_base=np.zeros(shape=(1,17))
-#
-#for m in range(total_data_delta.shape[0]):
-#    if np.count_nonzero(data_ac == m)==0:
-#        data_discard_base=np.vstack((data_discard_base,total_data[m,:].reshape(1,-1)))
-#        data_ac_base=np.append(data_ac_base,m)
-#data_discard_base[:,16]=0
-
-#ends here
-        
-
-#add in the baseline
-
-##
-##X_with_base=np.vstack((data_discard_base,data_crop)) #to keep discarded data
-##X_with_base=np.delete(X_with_base,0,0) #this is for data with discard
-##X_with_base=np.delete(X_with_base,1650,0) #this is for data with discard
-##
-#X_with_base=np.vstack((total_data[0:1058,:],data_crop)) #this is for regular
-#X_with_base=np.delete(X_with_base,1058,0) #this is for data w/o discard
-#
-##X=X_with_base[500:,:16]
-#
-#X=X_with_base[:,:16]
-#X_norm=(X-np.min(X))/(np.max(X)-np.min(X))
-##y=X_with_base[500:,16]
-#y=X_with_base[:,16]
-#
-#y_all = to_categorical(y)
-
-
-#-------------------
-#this part for touch/prox
-#-------------------
 
 #X=total_data[:,:16]
 
