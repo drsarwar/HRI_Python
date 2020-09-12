@@ -36,6 +36,7 @@ from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.utils import plot_model
 import sys, serial
+from keras.layers import BatchNormalization
 
 
 #adding some comment
@@ -79,6 +80,30 @@ def crop(all_data):
                 break
     return data_crop[1:,:]
 
+def conv4x4(input_data):
+    
+    data2D=np.zeros(shape=(input_data.shape[0],4,4))
+    #mapping for 4X4 board 3mm with arduino mega
+    for i in range(input_data.shape[0]):
+        data2D[i,0,0]=input_data[i,5]
+        data2D[i,0,1]=input_data[i,4]
+        data2D[i,0,2]=input_data[i,7]
+        data2D[i,0,3]=input_data[i,6]
+        data2D[i,1,0]=input_data[i,1]
+        data2D[i,1,1]=input_data[i,0]
+        data2D[i,1,2]=input_data[i,3]
+        data2D[i,1,3]=input_data[i,2]
+        data2D[i,2,0]=input_data[i,13]
+        data2D[i,2,1]=input_data[i,12]
+        data2D[i,2,2]=input_data[i,15]
+        data2D[i,2,3]=input_data[i,14]
+        data2D[i,3,0]=input_data[i,9]
+        data2D[i,3,1]=input_data[i,8]
+        data2D[i,3,2]=input_data[i,11]
+        data2D[i,3,3]=input_data[i,10]
+    
+    return data2D
+
 
 
 baseline='/Users/saquib/Desktop/4X4_CNN_T_P/baseline.0'
@@ -104,10 +129,15 @@ data_touch=np.array(X_touch.cap_data)
 for i in range(16):
     plt.plot(data_base[i,:])
 
-
+#------------
+#appending base,prox and touch data
+#-----------
 data=np.append(data_base,data_proximity,axis=1)
 data=np.append(data,data_touch, axis=1)
 
+#---------------
+#generating y data from array size of x data
+#---------------
 y_base=np.zeros(data_base.shape[1])
 y_proximity=1*np.ones(data_proximity.shape[1])
 y_touch=2*np.ones(data_touch.shape[1])
@@ -118,6 +148,8 @@ y=np.append(y, y_touch)
 data_t=np.transpose(data)
 
 total_data = np.hstack((data_t,(y.reshape(-1,1))))
+
+#-----------------
 
 #for i in range(16):
 #    plt.plot(data_delta[:,i])
@@ -137,7 +169,8 @@ total_data = np.hstack((data_t,(y.reshape(-1,1))))
 data_delta=np.zeros(shape=data_t.shape)
 for j in range(data_t.shape[1]):
     data_delta[:,j]=data_t[:,j]-np.mean(data_t[:10,j])
-    
+
+data_delta_scaled=-(data_delta-(0.001))/(0.001-(-0.05))
 #-----------------------------------------------#
 #this segment is for test data only
 #-----------------------------------------------#
@@ -172,7 +205,8 @@ X_test_data=np.transpose(X_test_data)
 test_data_delta=np.zeros(shape=X_test_data.shape)
 for j in range(X_test_data.shape[1]):
     test_data_delta[:,j]=X_test_data[:,j]-np.mean(data_t[:10,j])
-    
+
+test_data_delta_scaled=-(test_data_delta-(-0.001))/(0.001-(-0.05))
 
 y_proximity_test=1*np.ones(data_proximity_test.shape[1])
 y_touch_test=2*np.ones(data_touch_test.shape[1])
@@ -250,6 +284,7 @@ y_test_cat=to_categorical(y_test)
 #X=total_data[:,:16]
 
 X=data_delta
+#X=data_delta_scaled
 y=total_data[:,16]
 
 y_all = to_categorical(y)
@@ -274,12 +309,14 @@ y_all = to_categorical(y)
 
 
 X_train, X_test, y_train, y_test = train_test_split(
-         X, y_all, test_size=0.3, random_state=1)
+         X, y_all, test_size=0.1, random_state=1, stratify=y)
 #
 #for i in range(16):
 #    plt.plot(X[:,i])    
 #    
 
+
+new_data_2D_train=conv4x4(X_train)
 
 data2D_train=np.zeros(shape=(X_train.shape[0],4,4))
 #mapping for 4X4 board 3mm with arduino mega
@@ -371,6 +408,7 @@ for i in range(X_test.shape[0]):
 #    
 #    
 
+
 data2D_delta_test=np.zeros(shape=(test_data_delta.shape[0],4,4))
 #mapping for 4X4 board 3mm with arduino mega
 for i in range(test_data_delta.shape[0]):
@@ -390,6 +428,29 @@ for i in range(test_data_delta.shape[0]):
     data2D_delta_test[i,3,1]=test_data_delta[i,8]
     data2D_delta_test[i,3,2]=test_data_delta[i,11]
     data2D_delta_test[i,3,3]=test_data_delta[i,10]
+    
+
+
+
+data2D_delta_test_scaled=np.zeros(shape=(test_data_delta_scaled.shape[0],4,4))
+#mapping for 4X4 board 3mm with arduino mega
+for i in range(test_data_delta_scaled.shape[0]):
+    data2D_delta_test_scaled[i,0,0]=test_data_delta_scaled[i,5]
+    data2D_delta_test_scaled[i,0,1]=test_data_delta_scaled[i,4]
+    data2D_delta_test_scaled[i,0,2]=test_data_delta_scaled[i,7]
+    data2D_delta_test_scaled[i,0,3]=test_data_delta_scaled[i,6]
+    data2D_delta_test_scaled[i,1,0]=test_data_delta_scaled[i,1]
+    data2D_delta_test_scaled[i,1,1]=test_data_delta_scaled[i,0]
+    data2D_delta_test_scaled[i,1,2]=test_data_delta_scaled[i,3]
+    data2D_delta_test_scaled[i,1,3]=test_data_delta_scaled[i,2]
+    data2D_delta_test_scaled[i,2,0]=test_data_delta_scaled[i,13]
+    data2D_delta_test_scaled[i,2,1]=test_data_delta_scaled[i,12]
+    data2D_delta_test_scaled[i,2,2]=test_data_delta_scaled[i,15]
+    data2D_delta_test_scaled[i,2,3]=test_data_delta_scaled[i,14]
+    data2D_delta_test_scaled[i,3,0]=test_data_delta_scaled[i,9]
+    data2D_delta_test_scaled[i,3,1]=test_data_delta_scaled[i,8]
+    data2D_delta_test_scaled[i,3,2]=test_data_delta_scaled[i,11]
+    data2D_delta_test_scaled[i,3,3]=test_data_delta_scaled[i,10]
     
     
 #
@@ -432,11 +493,13 @@ plt.show()
 
 model=Sequential()
 
-model.add(Conv2D(20,
+model.add(Conv2D(4,
                  kernel_size=2,
                  activation='relu',
                  input_shape=(4, 4, 1),
                  padding='same'))
+#model.add(BatchNormalization())
+
 #model.add(Conv2D(10,
 #                 kernel_size=2,
 #                 activation='relu',
@@ -455,9 +518,13 @@ model.add(Flatten())
 model.add(Dense(32, 
                 activation='relu',
                 kernel_regularizer=keras.regularizers.l2(l=0.01)))
+#model.add(BatchNormalization())
+
 model.add(Dense(16, 
                 activation='relu',
                 kernel_regularizer=keras.regularizers.l2(l=0.01)))
+#model.add(BatchNormalization())
+
 model.add(Dense(3, 
                 activation='softmax'))
 
@@ -469,7 +536,7 @@ model.compile(optimizer='adam',
 #                  epochs=5,
 #                  validation_data = (data2D_test.reshape(data2D_test.shape[0],4,4,1), y_test))
 
-history=model.fit(data2D_train.reshape(data2D_train.shape[0],4,4,1), y_train,
+history=model.fit(data2D_train.reshape(new_data_2D_train.shape[0],4,4,1), y_train,
                   epochs=12,
                   validation_data = (data2D_delta_test.reshape(data2D_delta_test.shape[0],4,4,1), y_test_cat))
 
