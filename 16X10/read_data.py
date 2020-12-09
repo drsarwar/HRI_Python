@@ -38,7 +38,6 @@ signal_cnt=0;
 base_cnt=0;
 for j in range(data.shape[0]): #loop through t in data
     cnt=0
-
     base_flag=False;
     signal_flag=True;
     for k in range(data.shape[1]): #loop through taxels in data
