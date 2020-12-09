@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 import time
 import matplotlib.animation as animation
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import plot_confusion_matrix
 
 from scipy import signal
 import numpy as np
@@ -407,8 +409,11 @@ history=model.fit(data2D_train.reshape(data2D_train.shape[0],4,4,1), y_train,
 
 data2D_CNN_shape=data2D_test.reshape(data2D_test.shape[0],4,4,1)
 
+#adding this part to track the weights
 
+w, b = model.layers[6].get_weights()
 
+cm=confusion_matrix(y_test,model.predict(data2D_test.reshape(data2D_test.shape[0],4,4,1)))
 
 loss = history.history['loss']
 val_loss = history.history['val_loss']
@@ -439,6 +444,7 @@ plt.show()
 
 y_test_M = to_categorical(test_data[:,16])
 scores=model.evaluate(data2D_test_M.reshape(data2D_test_M.shape[0],4,4,1),y_test_M,verbose=1)
+
 
 
 
