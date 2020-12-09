@@ -32,18 +32,36 @@ baseline=np.mean(data[0:3,:],axis=0)
 
 
 ext=[]
+g_data=data[0:5,:].reshape(1,data.shape[1],5)
 crop=data[0,:].reshape(1,-1)
+signal_cnt=0;
+base_cnt=0;
 for j in range(data.shape[0]): #loop through t in data
     cnt=0
+
+    base_flag=False;
+    signal_flag=True;
     for k in range(data.shape[1]): #loop through taxels in data
         if (np.abs((data[j,k]-baseline[k]))<3): #this is the threshold, under this it means 
             cnt=cnt+1                           #that the signal is baseline
-            #print(cnt);
+            if (cnt==160):
+                base_flag=True;
+                signal_flag=False;
+                base_cnt=base_cnt+1;
+                if (base_cnt>2):
+                    signal_cnt=0;
+
+            #print(cnt);    
     ext.append(cnt);
     if (cnt<160): #if all the taxels are baseline then this will skip
+        signal_flag=True;
+        signal_cnt=signal_cnt+1
+        base_cnt=0
         crop=np.append(crop,data[j,:].reshape(1,-1),axis=0)
-        
 
+    if ((signal_flag)&(signal_cnt>4)):
+        g_data=np.append(g_data,crop[-5:,:].reshape(1,data.shape[1],-1),axis=0)
+        
 #
 plt.figure(1)
 for j in range(data.shape[1]):
@@ -52,3 +70,8 @@ for j in range(data.shape[1]):
 plt.figure(2)
 for j in range(crop.shape[1]):
     plt.plot(crop[:,j])
+
+plt.figure(3)
+for j in range(g_data.shape[1]):
+    plt.plot(g_data[1,j,:])
+
