@@ -10,8 +10,27 @@ Created on Wed Dec  9 12:39:32 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import matplotlib.animation as animation
+from sklearn.model_selection import train_test_split
+from tensorflow import keras
+from scipy import signal
+import numpy as np
+from keras.datasets import mnist
+import tensorflow as tf
+from keras.datasets import reuters
+from keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
+from tensorflow.keras import regularizers
+import matplotlib.pyplot as plt
+from keras.layers import Conv3D
+from keras.layers import Flatten
+from keras.utils import plot_model
+import sys, serial
+from keras.layers import BatchNormalization
 
-d_file='/Users/saquib/Desktop/screenlog.txt'
 
 def extract_data(d_file):
     file=open(d_file, 'r')
@@ -63,13 +82,149 @@ def extract_data(d_file):
     
         if ((signal_flag)&(signal_cnt>4)):
             g_data=np.append(g_data,crop[-5:,:].reshape(1,data.shape[1],-1),axis=0)
-        
-    return(crop,g_data)
+    
+    g_data_scaled=g_data/1024
+    g_data_2D=g_data_scaled.reshape(g_data.shape[0],16,10,g_data.shape[2])    
+    
+    return(crop,g_data,g_data_2D)
+
+def extract_baseline(d_file):
+    file=open(d_file, 'r')
+    lines=file.readlines()
+    
+    data_lis=[]
+    
+    for l in range(len(lines)):
+        s=lines[l].replace(',,',',').split(',')
+        for i in range(len(s)-1):
+            if (s[i]==""):
+                del s[i]
+            elif (s[i]=="\n"):
+                del s[i]
+        nn=(list(map(int,s)))
+        if (len(nn)==160):
+            data_lis.append(nn)
+    
+    data=np.array(data_lis)
+    b_data=data[0:5,:].reshape(1,data.shape[1],5)
+    for i in range(data.shape[0]-5):
+        b_data=np.append(b_data,data[i:i+5,:].reshape(1,data.shape[1],-1),axis=0)
+    
+    b_data_scaled=b_data/1024
+    b_data_2D=b_data_scaled.reshape(b_data.shape[0],16,10,b_data.shape[2])    
+   
+    return (b_data,b_data_2D)
+
+baseline_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/baseline.txt'
+stroke_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/stroke.txt'
+massage_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/massage.txt'
+
+
+g_base,g2_base=extract_baseline(baseline_file) #import x data for baseline
+c_stroke,g_stroke,g2_stroke=extract_data(stroke_file) #import x data for stroke
+c_massage,g_massage,g2_massage=extract_data(massage_file) #import x data for massage
+x_total=np.concatenate((g2_base, g2_stroke),axis=0)
+x_total=np.concatenate((x_total,g2_massage), axis=0)
+
+
+y_base=np.zeros(g2_base.shape[0]) #creating y labels for baseline
+y_stroke=np.ones(g2_stroke.shape[0]) #creating y labels for stroke
+y_massage=2*np.ones(g2_massage.shape[0]) #creating y labels for massage
+y_total=np.append(y_base,y_stroke) #creating final y by adding base and stroke
+y_total=np.append(y_total,y_massage) #adding in massage
+
+y_all = to_categorical(y_total) #one hot encoding
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+         x_total, y_all, test_size=0.2, random_state=1, stratify=y_total)
+
+
+model=Sequential()
+
+model.add(Conv3D(160,
+                 kernel_size=(3,3,3),
+                 strides=(1, 1, 1),
+                 activation='relu',
+                 input_shape=(16, 10, 5, 1),
+                 padding='same'))
+
+model.add(Conv3D(160,
+                 kernel_size=(3,3,3),
+                 strides=(1, 1, 1),
+                 activation='relu',
+                 padding='same'))
+
+#model.add(Conv2D(10,
+#                 kernel_size=2,
+#                 activation='relu',
+#                 padding='same'))
+#model.add(Conv2D(10,
+#                 kernel_size=2,
+#                 activation='relu',
+#                 padding='same'))
+model.add(Flatten())
+#model.add(Dense(784, 
+#                activation='relu',
+#                ))
+
+#model.add(Dense(64, 
+#                activation='relu'))
+model.add(Dense(320, 
+                activation='relu',
+                kernel_regularizer=keras.regularizers.l2(l=0.01)))
+#model.add(BatchNormalization())
+
+model.add(Dense(160, 
+                activation='relu',
+                kernel_regularizer=keras.regularizers.l2(l=0.01)))
+#model.add(BatchNormalization())
+
+
+model.add(Dense(80, 
+                activation='relu',
+                kernel_regularizer=keras.regularizers.l2(l=0.01)))
+
+model.add(Dense(3, 
+                activation='softmax'))
+
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+#history=model.fit(data2D_train.reshape(data2D_train.shape[0],4,4,1), y_train,
+#                  epochs=5,
+#                  validation_data = (data2D_test.reshape(data2D_test.shape[0],4,4,1), y_test))
+
+history=model.fit(X_train.reshape(X_train.shape[0],16,10,5,1), y_train,
+                  epochs=12,
+                  validation_data = (X_test.reshape(X_test.shape[0],16,10,5,1), y_test))
 
 
 
-cc,gg=extract_data(d_file)
 
-v=gg[0,:,0].reshape(1,16,10,1)
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs = range(1, len(loss) + 1)
+plt.plot(epochs, loss, 'bo', label='Training loss')
+plt.plot(epochs, val_loss, 'b', label='Validation loss')
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
 
+
+plt.clf()
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+plt.plot(epochs, acc, 'bo', label='Training accuracy')
+plt.ylim(0,1.1)
+plt.plot(epochs, val_acc, 'b', label='Validation accuracy')
+plt.ylim(0,1.1)
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
 

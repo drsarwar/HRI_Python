@@ -11,6 +11,40 @@ Created on Mon Dec  7 11:57:45 2020
 import numpy as np
 import matplotlib.pyplot as plt
 path='/Users/saquib/Desktop/screenlog.txt'
+
+
+###########################################
+#                                         #
+# this part is only to extract baseline####
+#                                         #
+###########################################
+file=open(path, 'r')
+lines=file.readlines()
+
+data_lis=[]
+
+for l in range(len(lines)):
+    s=lines[l].replace(',,',',').split(',')
+    for i in range(len(s)-1):
+        if (s[i]==""):
+            del s[i]
+        elif (s[i]=="\n"):
+            del s[i]
+    nn=(list(map(int,s)))
+    if (len(nn)==160):
+        data_lis.append(nn)
+
+data=np.array(data_lis)
+b_data=data[0:5,:].reshape(1,data.shape[1],5)
+for i in range(data.shape[0]-5):
+    b_data=np.append(b_data,data[i:i+5,:].reshape(1,data.shape[1],-1),axis=0)
+    
+
+
+
+
+#####################33
+
 file=open(path, 'r')
 lines=file.readlines()
 

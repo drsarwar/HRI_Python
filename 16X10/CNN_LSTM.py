@@ -66,4 +66,28 @@ def extract_data(d_file):
         
     return(crop,g_data)
 
+
+
 cc,gg=extract_data(d_file)
+
+v=gg[0,:,0].reshape(1,16,10,1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
