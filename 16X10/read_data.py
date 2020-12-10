@@ -61,9 +61,10 @@ for l in range(len(lines)):
     if (len(nn)==160):
         data_lis.append(nn)
 
-data=np.array(data_lis)
-baseline=np.mean(data[0:3,:],axis=0)
-
+data_raw=np.array(data_lis)
+baseline=np.mean(data_raw[0:3,:],axis=0)
+data=data_raw-baseline
+    
 
 ext=[]
 g_data=data[0:5,:].reshape(1,data.shape[1],5)
@@ -75,7 +76,7 @@ for j in range(data.shape[0]): #loop through t in data
     base_flag=False;
     signal_flag=True;
     for k in range(data.shape[1]): #loop through taxels in data
-        if (np.abs((data[j,k]-baseline[k]))<3): #this is the threshold, under this it means 
+        if (np.abs((data_raw[j,k]-baseline[k]))<3): #this is the threshold, under this it means 
             cnt=cnt+1                           #that the signal is baseline
             if (cnt==160):
                 base_flag=True;
@@ -94,7 +95,8 @@ for j in range(data.shape[0]): #loop through t in data
 
     if ((signal_flag)&(signal_cnt>4)):
         g_data=np.append(g_data,crop[-5:,:].reshape(1,data.shape[1],-1),axis=0)
-        
+
+ 
 #
 plt.figure(1)
 for j in range(data.shape[1]):

@@ -49,9 +49,9 @@ def extract_data(d_file):
         if (len(nn)==160):
             data_lis.append(nn)
     
-    data=np.array(data_lis)
-    baseline=np.mean(data[0:3,:],axis=0)
-    
+    data_raw=np.array(data_lis)
+    baseline=np.mean(data_raw[0:3,:],axis=0)
+    data=data_raw-baseline
     
     ext=[]
     g_data=data[0:5,:].reshape(1,data.shape[1],5)
@@ -63,7 +63,7 @@ def extract_data(d_file):
         base_flag=False;
         signal_flag=True;
         for k in range(data.shape[1]): #loop through taxels in data
-            if (np.abs((data[j,k]-baseline[k]))<3): #this is the threshold, under this it means 
+            if (np.abs((data_raw[j,k]-baseline[k]))<3): #this is the threshold, under this it means 
                 cnt=cnt+1                           #that the signal is baseline
                 if (cnt==160):
                     base_flag=True;
@@ -83,7 +83,7 @@ def extract_data(d_file):
         if ((signal_flag)&(signal_cnt>4)):
             g_data=np.append(g_data,crop[-5:,:].reshape(1,data.shape[1],-1),axis=0)
     
-    g_data_scaled=g_data/1024
+    g_data_scaled=g_data/512
     g_data_2D=g_data_scaled.reshape(g_data.shape[0],16,10,g_data.shape[2])    
     
     return(crop,g_data,g_data_2D)
@@ -105,12 +105,15 @@ def extract_baseline(d_file):
         if (len(nn)==160):
             data_lis.append(nn)
     
-    data=np.array(data_lis)
+    data_raw=np.array(data_lis)
+    baseline=np.mean(data_raw[0:3,:],axis=0)
+    data=data_raw-baseline
+    
     b_data=data[0:5,:].reshape(1,data.shape[1],5)
     for i in range(data.shape[0]-5):
         b_data=np.append(b_data,data[i:i+5,:].reshape(1,data.shape[1],-1),axis=0)
     
-    b_data_scaled=b_data/1024
+    b_data_scaled=b_data/512
     b_data_2D=b_data_scaled.reshape(b_data.shape[0],16,10,b_data.shape[2])    
    
     return (b_data,b_data_2D)
@@ -123,11 +126,11 @@ massage_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/massage.txt'
 g_base,g2_base=extract_baseline(baseline_file) #import x data for baseline
 c_stroke,g_stroke,g2_stroke=extract_data(stroke_file) #import x data for stroke
 c_massage,g_massage,g2_massage=extract_data(massage_file) #import x data for massage
-x_total=np.concatenate((g2_base, g2_stroke),axis=0)
+x_total=np.concatenate((g2_base[0:1500,:,:,:], g2_stroke),axis=0)
 x_total=np.concatenate((x_total,g2_massage), axis=0)
 
 
-y_base=np.zeros(g2_base.shape[0]) #creating y labels for baseline
+y_base=np.zeros(g2_base[0:1500,:,:,:].shape[0]) #creating y labels for baseline
 y_stroke=np.ones(g2_stroke.shape[0]) #creating y labels for stroke
 y_massage=2*np.ones(g2_massage.shape[0]) #creating y labels for massage
 y_total=np.append(y_base,y_stroke) #creating final y by adding base and stroke
@@ -142,14 +145,14 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 model=Sequential()
 
-model.add(Conv3D(160,
+model.add(Conv3D(30,
                  kernel_size=(3,3,3),
                  strides=(1, 1, 1),
                  activation='relu',
                  input_shape=(16, 10, 5, 1),
                  padding='same'))
 
-model.add(Conv3D(160,
+model.add(Conv3D(30,
                  kernel_size=(3,3,3),
                  strides=(1, 1, 1),
                  activation='relu',
@@ -171,19 +174,16 @@ model.add(Flatten())
 #model.add(Dense(64, 
 #                activation='relu'))
 model.add(Dense(320, 
-                activation='relu',
-                kernel_regularizer=keras.regularizers.l2(l=0.01)))
+                activation='relu'))
 #model.add(BatchNormalization())
 
 model.add(Dense(160, 
-                activation='relu',
-                kernel_regularizer=keras.regularizers.l2(l=0.01)))
+                activation='relu'))
 #model.add(BatchNormalization())
 
 
 model.add(Dense(80, 
-                activation='relu',
-                kernel_regularizer=keras.regularizers.l2(l=0.01)))
+                activation='relu'))
 
 model.add(Dense(3, 
                 activation='softmax'))
