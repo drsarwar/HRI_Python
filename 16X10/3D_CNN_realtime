@@ -122,12 +122,26 @@ baseline_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/baseline.tx
 stroke_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/stroke.txt'
 massage_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/massage.txt'
 
+#paths for test data
+baseline_test_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/baseline_test.txt'
+stroke_test_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/stroke_test.txt'
+massage_test_file='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10/massage_test.txt'
+
 
 g_base,g2_base=extract_baseline(baseline_file) #import x data for baseline
 c_stroke,g_stroke,g2_stroke=extract_data(stroke_file) #import x data for stroke
 c_massage,g_massage,g2_massage=extract_data(massage_file) #import x data for massage
 x_total=np.concatenate((g2_base[0:1500,:,:,:], g2_stroke),axis=0)
 x_total=np.concatenate((x_total,g2_massage), axis=0)
+
+#acquiring test data
+g_base_t,g2_base_t=extract_baseline(baseline_test_file) #import x test data for baseline
+c_stroke_t,g_stroke_t,g2_stroke_t=extract_data(stroke_test_file) #import x data for stroke
+c_massage_t,g_massage_t,g2_massage_t=extract_data(massage_test_file) #import x data for massage
+x_total_t=np.concatenate((g2_base_t[0:200,:,:,:], g2_stroke_t[0:200,:,:,:]),axis=0)
+x_total_t=np.concatenate((x_total_t,g2_massage_t), axis=0)
+
+
 
 
 y_base=np.zeros(g2_base[0:1500,:,:,:].shape[0]) #creating y labels for baseline
@@ -137,6 +151,18 @@ y_total=np.append(y_base,y_stroke) #creating final y by adding base and stroke
 y_total=np.append(y_total,y_massage) #adding in massage
 
 y_all = to_categorical(y_total) #one hot encoding
+
+
+#generate test labels
+
+y_base_t=np.zeros(g2_base_t[0:200,:,:,:].shape[0]) #creating y labels for baseline
+y_stroke_t=np.ones(g2_stroke_t[0:200,:,:,:].shape[0]) #creating y labels for stroke
+y_massage_t=2*np.ones(g2_massage_t.shape[0]) #creating y labels for massage
+y_total_t=np.append(y_base_t,y_stroke_t) #creating final y by adding base and stroke
+y_total_t=np.append(y_total_t,y_massage_t) #adding in massage
+
+y_all_t = to_categorical(y_total_t) #one hot encoding
+
 
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -192,42 +218,48 @@ model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-#history=model.fit(data2D_train.reshape(data2D_train.shape[0],4,4,1), y_train,
-#                  epochs=5,
-#                  validation_data = (data2D_test.reshape(data2D_test.shape[0],4,4,1), y_test))
+
+#using validation data
+#history=model.fit(X_train.reshape(X_train.shape[0],16,10,5,1), y_train,
+#                  epochs=12,
+#                  validation_data = (X_test.reshape(X_test.shape[0],16,10,5,1), y_test))
+
+
+#using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],16,10,5,1), y_train,
                   epochs=12,
-                  validation_data = (X_test.reshape(X_test.shape[0],16,10,5,1), y_test))
+                  validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,5,1), y_all_t))
+
 
 #
 #
-#
-#loss = history.history['loss']
-#val_loss = history.history['val_loss']
-#epochs = range(1, len(loss) + 1)
-#plt.plot(epochs, loss, 'bo', label='Training loss')
-#plt.plot(epochs, val_loss, 'b', label='Validation loss')
-#plt.title('Training and validation loss')
-#plt.xlabel('Epochs')
-#plt.ylabel('Loss')
-#plt.legend()
-#plt.show()
-#
-#
-#plt.clf()
-#acc = history.history['accuracy']
-#val_acc = history.history['val_accuracy']
-#plt.plot(epochs, acc, 'bo', label='Training accuracy')
-#plt.ylim(0,1.1)
-#plt.plot(epochs, val_acc, 'b', label='Validation accuracy')
-#plt.ylim(0,1.1)
-#plt.title('Training and validation accuracy')
-#plt.xlabel('Epochs')
-#plt.ylabel('Accuracy')
-#plt.legend()
-#plt.show()
-#
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs = range(1, len(loss) + 1)
+plt.plot(epochs, loss, 'bo', label='Training loss')
+plt.plot(epochs, val_loss, 'b', label='Validation loss')
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+
+plt.clf()
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+plt.plot(epochs, acc, 'bo', label='Training accuracy')
+plt.ylim(0,1.1)
+plt.plot(epochs, val_acc, 'b', label='Validation accuracy')
+plt.ylim(0,1.1)
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
 
 
 
