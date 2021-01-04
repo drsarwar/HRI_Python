@@ -271,10 +271,10 @@ ser = serial.Serial(strPort, baudrate=115200)
 #fig,ax = plt.subplots(1,1)
 #image = data2D_delta_test[0,:,:]
 #im = ax.imshow(image,vmin=-0.05, vmax=0.0002,cmap='gray')
-
+#---------------------------------------------------------
 #this part reads 5 sets of data and then averages them 
 #in order to get the baseline
-
+#---------------------------------------------------------
 rt_base=[]
 
 for j in range(5):
@@ -297,28 +297,52 @@ for j in range(5):
 
 rt_baseline=np.mean(np.array(rt_base),axis=0)
 
+#----------------------------------------------------------
+#this creates the first frame of 5 data points
+#----------------------------------------------------------
+rt_frame_l=[]
+for k in range(5):
+    line = str(ser.readline())
+    #print(line)
+    s=line.replace(',,',',').split(',')
+    for i in range(len(s)-1):
+        if (s[i]==""):
+            del s[i]
+        elif (s[i]=="b'"):
+            del s[i]
+        elif (s[i]=="\n'"):
+            del s[i]
+        elif (s[i]=="\\n'"):
+            del s[i]
+    nn=(list(map(int,s)))
+    if (len(nn)==160):
+        rt_frame_l.append(nn)
+
+#----------------------------------------------------------
 
 while True:
+    #read current frame
     
-    rt_data_l=[]
-    for k in range(5):
-        line = str(ser.readline())
-        #print(line)
-        s=line.replace(',,',',').split(',')
-        for i in range(len(s)-1):
-            if (s[i]==""):
-                del s[i]
-            elif (s[i]=="b'"):
-                del s[i]
-            elif (s[i]=="\n'"):
-                del s[i]
-            elif (s[i]=="\\n'"):
-                del s[i]
-        nn=(list(map(int,s)))
-        if (len(nn)==160):
-            rt_data_l.append(nn)
+    line = str(ser.readline())
+    #print(line)
+    s=line.replace(',,',',').split(',')
+    for i in range(len(s)-1):
+        if (s[i]==""):
+            del s[i]
+        elif (s[i]=="b'"):
+            del s[i]
+        elif (s[i]=="\n'"):
+            del s[i]
+        elif (s[i]=="\\n'"):
+            del s[i]
+    nn=(list(map(int,s)))
+    if (len(nn)==160):
+        del rt_frame_l[0]
+        
+        rt_frame_l.append(nn)   
     
-    rt_data=(np.array(rt_data_l)-rt_baseline).reshape(1,16,10,5,1)/512
+    
+    rt_data=(np.array(rt_frame_l)-rt_baseline).reshape(1,16,10,5,1)/512
     
     result=model.predict(rt_data)
     if (np.argmax(result)==0):
