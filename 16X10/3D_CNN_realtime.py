@@ -281,6 +281,7 @@ for j in range(5):
     line = str(ser.readline())
     #print(line)
     s=line.replace(',,',',').split(',')
+    #this loop is to delete junk variables that come through the port
     for i in range(len(s)-1):
         if (s[i]==""):
             del s[i]
