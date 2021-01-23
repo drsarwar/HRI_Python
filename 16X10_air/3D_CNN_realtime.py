@@ -54,17 +54,19 @@ def extract_data(d_file):
     baseline=np.mean(data_raw[0:3,:],axis=0)
     data=data_raw-baseline
     
+    window=5
     ext=[]
-    g_data=data[0:5,:].reshape(1,data.shape[1],5)
+    g_data=np.transpose(data[0:window,:])
+    #g_data=data[0:window,:].reshape(1,data.shape[1],window)
     crop=data[0,:].reshape(1,-1)
     signal_cnt=0;
     base_cnt=0;
-    for j in range(data.shape[0]): #loop through t in data
+    for frm in range(data.shape[0]): #loop through frames aka time in data
         cnt=0
         base_flag=False;
         signal_flag=True;
-        for k in range(data.shape[1]): #loop through taxels in data
-            if (np.abs((data_raw[j,k]-baseline[k]))<3): #this is the threshold, under this it means 
+        for txl in range(data.shape[1]): #loop through taxels in data
+            if (np.abs((data[frm,txl]))<3): #this is the threshold, under this it means 
                 cnt=cnt+1                           #that the signal is baseline
                 if (cnt==160):
                     base_flag=True;
@@ -79,13 +81,21 @@ def extract_data(d_file):
             signal_flag=True;
             signal_cnt=signal_cnt+1
             base_cnt=0
-            crop=np.append(crop,data[j,:].reshape(1,-1),axis=0)
+            crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
+            crop_t=np.transpose(crop)
+        if ((signal_flag==True) and (signal_cnt>window)):
+            g_data=np.dstack((g_data,crop_t[:,-window:]))
     
-        if ((signal_flag)&(signal_cnt>4)):
-            g_data=np.append(g_data,crop[-5:,:].reshape(1,data.shape[1],-1),axis=0)
+    g2_data=np.zeros(shape=(g_data.shape[2],16,10,window))
     
-    g_data_scaled=g_data/256
-    g_data_2D=g_data_scaled.reshape(g_data.shape[0],16,10,g_data.shape[2])    
+    for n_win in range(g_data.shape[2]):
+        for n_frm in range(window):
+            for y_frm in range(16):
+                for x_frm in range(10):
+                    g2_data[n_win,y_frm,x_frm,n_frm]=g_data[(x_frm+10*y_frm),n_frm,n_win]
+    
+    g_data_2D=g2_data/256
+    #g_data_2D=g_data_scaled.reshape(g_data.shape[0],16,10,g_data.shape[2])    
     
     return(crop,g_data,g_data_2D)
 
