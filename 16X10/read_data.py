@@ -10,7 +10,7 @@ Created on Mon Dec  7 11:57:45 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
-path='/Users/saquib/Desktop/screenlog.txt'
+path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/hard_stroke.txt'
 
 
 ###########################################
@@ -76,7 +76,7 @@ for j in range(data.shape[0]): #loop through t in data
     base_flag=False;
     signal_flag=True;
     for k in range(data.shape[1]): #loop through taxels in data
-        if (np.abs((data_raw[j,k]-baseline[k]))<3): #this is the threshold, under this it means 
+        if (np.abs((data_raw[j,k]-baseline[k]))<4): #this is the threshold, under this it means 
             cnt=cnt+1                           #that the signal is baseline
             if (cnt==160):
                 base_flag=True;

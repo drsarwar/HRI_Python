@@ -133,7 +133,7 @@ g_base,g2_base=extract_baseline(baseline_file) #import x data for baseline
 c_stroke,g_stroke,g2_stroke=extract_data(stroke_file) #import x data for stroke
 c_massage,g_massage,g2_massage=extract_data(massage_file) #import x data for massage
 #x_total=np.concatenate((g2_base[0:1500,:,:,:], g2_stroke),axis=0)
-x_total=np.concatenate((g2_base[0:600,:,:,:], g2_stroke),axis=0)
+x_total=np.concatenate((g2_base[:,:,:,:], g2_stroke),axis=0)
 
 x_total=np.concatenate((x_total,g2_massage), axis=0)
 
@@ -148,7 +148,7 @@ x_total_t=np.concatenate((x_total_t,g2_massage_t), axis=0)
 
 
 #y_base=np.zeros(g2_base[0:1500,:,:,:].shape[0]) #creating y labels for baseline
-y_base=np.zeros(g2_base[0:600,:,:,:].shape[0]) #creating y labels for baseline
+y_base=np.zeros(g2_base[:,:,:,:].shape[0]) #creating y labels for baseline
 
 y_stroke=np.ones(g2_stroke.shape[0]) #creating y labels for stroke
 y_massage=2*np.ones(g2_massage.shape[0]) #creating y labels for massage
