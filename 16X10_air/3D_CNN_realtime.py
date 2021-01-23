@@ -66,7 +66,7 @@ def extract_data(d_file):
         base_flag=False;
         signal_flag=True;
         for txl in range(data.shape[1]): #loop through taxels in data
-            if (np.abs((data[frm,txl]))<3): #this is the threshold, under this it means 
+            if (np.abs((data[frm,txl]))<4): #this is the threshold, under this it means 
                 cnt=cnt+1                           #that the signal is baseline
                 if (cnt==160):
                     base_flag=True;
@@ -270,7 +270,7 @@ model.compile(optimizer='adam',
 #using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],16,10,5,1), y_train,
-                  epochs=5,
+                  epochs=12,
                   validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,5,1), y_all_t))
 
 
