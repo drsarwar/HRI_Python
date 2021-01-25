@@ -9,7 +9,7 @@ Created on Fri Jan 22 13:24:42 2021
 import numpy as np
 import matplotlib.pyplot as plt
 path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/hard_stroke.txt'
-
+pad_flag=True
 
 ###########################################
 #                                         #
@@ -91,10 +91,17 @@ for frm in range(data.shape[0]): #loop through frames aka time in data
         signal_flag=True;
         signal_cnt=signal_cnt+1
         base_cnt=0
-        crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
+        if ((pad_flag == True) and (signal_cnt==1)):
+            crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
+            crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
+            crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
+            signal_cnt=4            
+        else:
+            crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
+        
         crop_t=np.transpose(crop)
     if ((signal_flag==True) and (signal_cnt>window)):
-        mm=np.max(crop)
+
         g_data=np.dstack((g_data,crop_t[:,-window:]))
 
 g2_data=np.zeros(shape=(g_data.shape[2],16,10,window))
@@ -119,5 +126,5 @@ for j in range(crop.shape[1]):
 
 plt.figure(3)
 for j in range(g_data.shape[0]):
-    plt.plot(g_data[j,:,3])
+    plt.plot(g_data[j,:,11])
 
