@@ -7,7 +7,6 @@ Created on Wed Dec  9 12:39:32 2020
 """
 
 
-
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -67,7 +66,7 @@ def extract_data(d_file):
         base_flag=False;
         signal_flag=True;
         for txl in range(data.shape[1]): #loop through taxels in data
-            if (np.abs((data[frm,txl]))<4): #this is the threshold, under this it means 
+            if (np.abs((data[frm,txl]))<3): #this is the threshold, under this it means 
                 cnt=cnt+1                           #that the signal is baseline
                 if (cnt==160):
                     base_flag=True;

@@ -10,27 +10,26 @@ Created on Wed Dec  9 12:39:32 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
-import time
-import matplotlib.animation as animation
-from sklearn.model_selection import train_test_split
-from tensorflow import keras
-from scipy import signal
-import numpy as np
-from keras.datasets import mnist
-import tensorflow as tf
-from keras.datasets import reuters
-from keras.utils import to_categorical
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Dropout
-from tensorflow.keras import regularizers
-import matplotlib.pyplot as plt
-from keras.layers import Conv3D
-from keras.layers import Flatten
-from keras.utils import plot_model
-import sys, serial
-from keras.layers import BatchNormalization
-from sklearn.metrics import plot_confusion_matrix
+# import time
+# import matplotlib.animation as animation
+# from sklearn.model_selection import train_test_split
+# from tensorflow import keras
+# from scipy import signal
+# from keras.datasets import mnist
+# import tensorflow as tf
+# from keras.datasets import reuters
+# from keras.utils import to_categorical
+# from keras.models import Sequential
+# from keras.layers import Dense
+# from keras.layers import Dropout
+# from tensorflow.keras import regularizers
+# import matplotlib.pyplot as plt
+# from keras.layers import Conv3D
+# from keras.layers import Flatten
+# from keras.utils import plot_model
+# import sys, serial
+# from keras.layers import BatchNormalization
+# from sklearn.metrics import plot_confusion_matrix
 
 
 def extract_data(d_file):
@@ -102,30 +101,38 @@ def extract_data(d_file):
 def extract_baseline(d_file):
     file=open(d_file, 'r')
     lines=file.readlines()
-    
+    window=5
     data_lis=[]
     
-    for l in range(len(lines)):
+    for l in range(len(lines)): #loop through frames aka time 
         s=lines[l].replace(',,',',').split(',')
         for i in range(len(s)-1):
             if (s[i]==""):
                 del s[i]
             elif (s[i]=="\n"):
                 del s[i]
-        nn=(list(map(int,s)))
+        nn=(list(map(int,s))) #map the data to a list of cap magnitudes
         if (len(nn)==160):
-            data_lis.append(nn)
+            data_lis.append(nn) #if all 160 is present, treat it as a valid frame and append
     
     data_raw=np.array(data_lis)
     baseline=np.mean(data_raw[0:3,:],axis=0)
     data=data_raw-baseline
     
-    b_data=data[0:5,:].reshape(1,data.shape[1],5)
-    for i in range(data.shape[0]-5):
-        b_data=np.append(b_data,data[i:i+5,:].reshape(1,data.shape[1],-1),axis=0)
+    #b_data=data[0:window,:].reshape(1,data.shape[1],window)
+    b_data=data[0:window,:]
+    for i in range(data.shape[0]-window):
+        b_data=np.dstack((b_data,data[i:i+window,:]))
     
-    b_data_scaled=b_data/256
-    b_data_2D=b_data_scaled.reshape(b_data.shape[0],16,10,b_data.shape[2])    
+    b2_data=np.zeros(shape=(b_data.shape[2],16,10,window))
+    
+    for n_win in range(b_data.shape[2]):
+        for n_frm in range(window):
+            for y_frm in range(16):
+                for x_frm in range(10):
+                    b2_data[n_win,y_frm,x_frm,n_frm]=b_data[n_frm,(x_frm+10*y_frm),n_win]
+    
+    b_data_2D=b2_data/256
    
     return (b_data,b_data_2D)
 
