@@ -10,28 +10,28 @@ Created on Wed Dec  9 12:39:32 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
-# import time
-# import matplotlib.animation as animation
-# from sklearn.model_selection import train_test_split
-# from tensorflow import keras
-# from scipy import signal
-# from keras.datasets import mnist
-# import tensorflow as tf
-# from keras.datasets import reuters
-# from keras.utils import to_categorical
-# from keras.models import Sequential
-# from keras.layers import Dense
-# from keras.layers import Dropout
-# from tensorflow.keras import regularizers
-# import matplotlib.pyplot as plt
-# from keras.layers import Conv3D
-# from keras.layers import Flatten
-# from keras.utils import plot_model
-# import sys, serial
-# from keras.layers import BatchNormalization
-# from sklearn.metrics import plot_confusion_matrix
+import time
+import matplotlib.animation as animation
+from sklearn.model_selection import train_test_split
+from tensorflow import keras
+from scipy import signal
+from keras.datasets import mnist
+import tensorflow as tf
+from keras.datasets import reuters
+from keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
+from tensorflow.keras import regularizers
+import matplotlib.pyplot as plt
+from keras.layers import Conv3D
+from keras.layers import Flatten
+from keras.utils import plot_model
+import sys, serial
+from keras.layers import BatchNormalization
+from sklearn.metrics import plot_confusion_matrix
 
-
+window=9
 def extract_data(d_file):
     file=open(d_file, 'r')
     lines=file.readlines()
@@ -53,7 +53,7 @@ def extract_data(d_file):
     baseline=np.mean(data_raw[0:3,:],axis=0)
     data=data_raw-baseline
     
-    window=5
+    #window=5
     ext=[]
     g_data=np.transpose(data[0:window,:])
     #g_data=data[0:window,:].reshape(1,data.shape[1],window)
@@ -65,7 +65,7 @@ def extract_data(d_file):
         base_flag=False;
         signal_flag=True;
         for txl in range(data.shape[1]): #loop through taxels in data
-            if (np.abs((data[frm,txl]))<4): #this is the threshold, under this it means 
+            if (np.abs((data[frm,txl]))<3): #this is the threshold, under this it means 
                 cnt=cnt+1                           #that the signal is baseline
                 if (cnt==160):
                     base_flag=True;
@@ -101,7 +101,7 @@ def extract_data(d_file):
 def extract_baseline(d_file):
     file=open(d_file, 'r')
     lines=file.readlines()
-    window=5
+    #window=5
     data_lis=[]
     
     for l in range(len(lines)): #loop through frames aka time 
@@ -163,7 +163,7 @@ x_total=np.concatenate((g2_base[:,:,:,:], g2_air_stroke),axis=0)
 x_total=np.concatenate((x_total,g2_light_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_hard_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_tickle), axis=0)
-x_total=np.concatenate((x_total,g2_hit), axis=0)
+#x_total=np.concatenate((x_total,g2_hit), axis=0)
 
 
 
@@ -177,9 +177,9 @@ c_hit_t,g_hit_t,g2_hit_t=extract_data(hit_file_t)
 
 x_total_t=np.concatenate((g2_base_t[:,:,:,:], g2_air_stroke_t),axis=0)
 x_total_t=np.concatenate((x_total_t,g2_light_stroke_t), axis=0)
-x_total_t=np.concatenate((x_total_t,g2_hard_stroke_t[50:,:,:,:]), axis=0)
+x_total_t=np.concatenate((x_total_t,g2_hard_stroke_t[:,:,:,:]), axis=0)
 x_total_t=np.concatenate((x_total_t,g2_tickle_t), axis=0)
-x_total_t=np.concatenate((x_total_t,g2_hit_t), axis=0)
+#x_total_t=np.concatenate((x_total_t,g2_hit_t), axis=0)
 
 
 
@@ -188,12 +188,12 @@ y_air_stroke=np.ones(g2_air_stroke.shape[0]) #creating y labels for stroke
 y_light_stroke=2*np.ones(g2_light_stroke.shape[0]) #creating y labels for massage
 y_hard_stroke=3*np.ones(g2_hard_stroke.shape[0])
 y_tickle=4*np.ones(g2_tickle.shape[0])
-y_hit=5*np.ones(g2_hit.shape[0])
+#y_hit=5*np.ones(g2_hit.shape[0])
 y_total=np.append(y_base,y_air_stroke) #creating final y by adding base and stroke
 y_total=np.append(y_total,y_light_stroke) #adding in massage
 y_total=np.append(y_total,y_hard_stroke)
 y_total=np.append(y_total,y_tickle)
-y_total=np.append(y_total,y_hit)
+#y_total=np.append(y_total,y_hit)
 
 y_all = to_categorical(y_total) #one hot encoding
 
@@ -203,20 +203,20 @@ y_all = to_categorical(y_total) #one hot encoding
 y_base_t=np.zeros(g2_base_t[:,:,:,:].shape[0]) #creating y labels for baseline
 y_air_stroke_t=np.ones(g2_air_stroke_t.shape[0]) #creating y labels for stroke
 y_light_stroke_t=2*np.ones(g2_light_stroke_t.shape[0]) #creating y labels for massage
-y_hard_stroke_t=3*np.ones(g2_hard_stroke_t[50:,:,:,:].shape[0])
+y_hard_stroke_t=3*np.ones(g2_hard_stroke_t[:,:,:,:].shape[0])
 y_tickle_t=4*np.ones(g2_tickle_t.shape[0])
-y_hit_t=5*np.ones(g2_hit_t.shape[0])
+#y_hit_t=5*np.ones(g2_hit_t.shape[0])
 y_total_t=np.append(y_base_t,y_air_stroke_t) #creating final y by adding base and stroke
 y_total_t=np.append(y_total_t,y_light_stroke_t) #adding in massage
 y_total_t=np.append(y_total_t,y_hard_stroke_t)
 y_total_t=np.append(y_total_t,y_tickle_t)
-y_total_t=np.append(y_total_t,y_hit_t)
+#y_total_t=np.append(y_total_t,y_hit_t)
 
 y_all_t = to_categorical(y_total_t) #one hot encoding
 
 
 X_train, X_test, y_train, y_test = train_test_split(
-         x_total, y_all, test_size=0.2, random_state=1, stratify=y_total)
+         x_total, y_all, test_size=0.1, random_state=1, stratify=y_total)
 
 model=Sequential()
 
@@ -224,7 +224,7 @@ model.add(Conv3D(30,
                  kernel_size=(3,3,3),
                  strides=(1, 1, 1),
                  activation='relu',
-                 input_shape=(16, 10, 5, 1),
+                 input_shape=(16, 10, window, 1),
                  padding='same'))
 
 model.add(Conv3D(30,
@@ -260,7 +260,7 @@ model.add(Dense(160,
 model.add(Dense(80, 
                 activation='relu'))
 
-model.add(Dense(6, 
+model.add(Dense(5, 
                 activation='softmax'))
 
 model.compile(optimizer='adam',
@@ -276,9 +276,9 @@ model.compile(optimizer='adam',
 
 #using test data
 
-history=model.fit(X_train.reshape(X_train.shape[0],16,10,5,1), y_train,
-                  epochs=12,
-                  validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,5,1), y_all_t))
+history=model.fit(X_train.reshape(X_train.shape[0],16,10,window,1), y_train,
+                  epochs=5,
+                  validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t))
 
 
 
@@ -309,7 +309,7 @@ plt.ylabel('Accuracy')
 plt.legend()
 plt.show()
 
-pred=model.predict(x_total_t.reshape(x_total_t.shape[0],16,10,5,1))
+pred=model.predict(x_total_t.reshape(x_total_t.shape[0],16,10,window,1))
 
 y_true=np.array(tf.argmax(y_all_t,axis=1))
 y_pred=np.array(tf.argmax(pred, axis=1))
@@ -350,10 +350,10 @@ for j in range(5):
 rt_baseline=np.mean(np.array(rt_base),axis=0)
 
 #----------------------------------------------------------
-#this creates the first frame of 5 data points
+#this creates the first frame of window data points
 #----------------------------------------------------------
 rt_frame_l=[]
-for k in range(5):
+for k in range(window):
     line = str(ser.readline())
     #print(line)
     s=line.replace(',,',',').split(',')
@@ -394,7 +394,7 @@ while True:
         rt_frame_l.append(nn)   
     
     
-    rt_data=(np.array(rt_frame_l)-rt_baseline).reshape(1,16,10,5,1)/256
+    rt_data=(np.array(rt_frame_l)-rt_baseline).reshape(1,16,10,window,1)/256
     
     result=model.predict(rt_data)
     if (np.argmax(result)==0):
