@@ -31,7 +31,9 @@ import sys, serial
 from keras.layers import BatchNormalization
 from sklearn.metrics import plot_confusion_matrix
 
-window=9
+window=5
+pad_flag=True
+
 def extract_data(d_file):
     file=open(d_file, 'r')
     lines=file.readlines()
@@ -80,7 +82,15 @@ def extract_data(d_file):
             signal_flag=True;
             signal_cnt=signal_cnt+1
             base_cnt=0
-            crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
+            if ((pad_flag == True) and (signal_cnt==1)):
+                crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
+                crop=np.append(crop,data[frm-2,:].reshape(1,-1),axis=0)
+                crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
+                crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
+                signal_cnt=4            
+            else:
+                crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
+            
             crop_t=np.transpose(crop)
         if ((signal_flag==True) and (signal_cnt>window)):
             g_data=np.dstack((g_data,crop_t[:,-window:]))

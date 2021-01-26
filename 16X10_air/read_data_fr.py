@@ -93,9 +93,10 @@ for frm in range(data.shape[0]): #loop through frames aka time in data
         base_cnt=0
         if ((pad_flag == True) and (signal_cnt==1)):
             crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
-            crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
+            crop=np.append(crop,data[frm-2,:].reshape(1,-1),axis=0)
             crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
-            signal_cnt=4            
+            crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
+            signal_cnt=4         
         else:
             crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
         
