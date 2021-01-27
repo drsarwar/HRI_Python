@@ -8,7 +8,9 @@ Created on Fri Jan 22 13:24:42 2021
 
 import numpy as np
 import matplotlib.pyplot as plt
-path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/hard_stroke.txt'
+import matplotlib.animation as animation
+
+path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/tickle.txt'
 pad_flag=True
 
 ###########################################
@@ -37,9 +39,6 @@ b_data=data[0:5,:].reshape(1,data.shape[1],5)
 for i in range(data.shape[0]-5):
     b_data=np.append(b_data,data[i:i+5,:].reshape(1,data.shape[1],-1),axis=0)
     
-
-
-
 
 ##############################################################################
 
@@ -92,11 +91,11 @@ for frm in range(data.shape[0]): #loop through frames aka time in data
         signal_cnt=signal_cnt+1
         base_cnt=0
         if ((pad_flag == True) and (signal_cnt==1)):
-            crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
+            #crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
             crop=np.append(crop,data[frm-2,:].reshape(1,-1),axis=0)
             crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
             crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
-            signal_cnt=4         
+            signal_cnt=3      
         else:
             crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
         
@@ -114,18 +113,34 @@ for n_win in range(g_data.shape[2]):
                 g2_data[n_win,y_frm,x_frm,n_frm]=g_data[(x_frm+10*y_frm),n_frm,n_win]
 
       #  g_data=np.concatenate((g_data,crop_t[:,-window:].reshape(1,crop_t.shape[0],window)),axis=0)
-        
- 
 
-plt.figure(1)
-for j in range(data.shape[1]):
-    plt.plot(data[:,j])
 
-plt.figure(2)
-for j in range(crop.shape[1]):
-    plt.plot(crop[:,j])
+# 
+#
+#plt.figure(1)
+#for j in range(data.shape[1]):
+#    plt.plot(data[:,j])
+#
+#plt.figure(2)
+#for j in range(crop.shape[1]):
+#    plt.plot(crop[:,j])
+#
+#plt.figure(3)
+#for j in range(g_data.shape[0]):
+#    plt.plot(g_data[j,:,11])
 
-plt.figure(3)
-for j in range(g_data.shape[0]):
-    plt.plot(g_data[j,:,11])
+D2_data=np.zeros(shape=(data.shape[0],16,10))
+for n_ in range(data.shape[0]):
+    for y_frm in range(16):
+        for x_frm in range(10):
+            D2_data[n_,y_frm,x_frm]=data[n_,(x_frm+10*y_frm)]
+
+
+def animate(i):
+    #data_a = D2_data[i,:,:] #select data range
+#    plt.imshow(data_a, vmin=-0.02,vmax=0.56, cmap='gray')
+    plt.imshow(D2_data[i,:,:], vmin=-1, vmax=1, cmap='bwr')
+
+fig=plt.figure(1)
+ani = animation.FuncAnimation(fig, animate, frames=data.shape[0], interval=30, repeat=True)
 
