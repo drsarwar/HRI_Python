@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/tickle.txt'
+path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/test/tickle.txt'
 pad_flag=True
 
 ###########################################
@@ -115,12 +115,12 @@ for n_win in range(g_data.shape[2]):
       #  g_data=np.concatenate((g_data,crop_t[:,-window:].reshape(1,crop_t.shape[0],window)),axis=0)
 
 
-# 
-#
-#plt.figure(1)
-#for j in range(data.shape[1]):
-#    plt.plot(data[:,j])
-#
+ 
+
+plt.figure(1)
+for j in range(data.shape[1]):
+    plt.plot(data[:,j])
+
 #plt.figure(2)
 #for j in range(crop.shape[1]):
 #    plt.plot(crop[:,j])
