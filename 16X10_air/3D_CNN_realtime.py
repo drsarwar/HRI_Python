@@ -32,8 +32,8 @@ from keras.layers import BatchNormalization
 from sklearn.metrics import plot_confusion_matrix
 import os
 
-window=6
-pad_flag=False
+window=12
+pad_flag=True
 
 def extract_data(d_file):
     file=open(d_file, 'r')
@@ -154,6 +154,8 @@ light_stroke_file=dir_path+'/light_stroke.txt'
 hard_stroke_file=dir_path+'/hard_stroke.txt'
 tickle_file=dir_path+'/tickle.txt'
 hit_file=dir_path+'/hit.txt'
+hover_file=dir_path+'/hover.txt'
+light_touch_file=dir_path+'/light_touch.txt'
 
 #paths for test data
 baseline_file_t=dir_path+'/test/baseline.txt'
@@ -162,6 +164,8 @@ light_stroke_file_t=dir_path+'/test/light_stroke.txt'
 hard_stroke_file_t=dir_path+'/test/hard_stroke.txt'
 tickle_file_t=dir_path+'/test/tickle.txt'
 hit_file_t=dir_path+'/test/hit.txt'
+hover_file_t=dir_path+'/test/hover.txt'
+light_touch_file_t=dir_path+'/test/light_touch.txt'
 
 #acquiring data
 g_base,g2_base=extract_baseline(baseline_file) #import x data for baseline
@@ -169,13 +173,17 @@ c_air_stroke,g_air_stroke,g2_air_stroke=extract_data(air_stroke_file) #import x 
 c_light_stroke,g_light_stroke,g2_light_stroke=extract_data(light_stroke_file) #import x data for light stroke
 c_hard_stroke,g_hard_stroke,g2_hard_stroke=extract_data(hard_stroke_file)
 c_tickle,g_tickle,g2_tickle=extract_data(tickle_file)
-c_hit,g_hit,g2_hit=extract_data(hit_file)
+#c_hit,g_hit,g2_hit=extract_data(hit_file)
+#c_hover,g_hover,g2_hover=extract_data(hover_file)
+c_light_touch,g_light_touch,g2_light_touch=extract_data(light_touch_file)
 
 x_total=np.concatenate((g2_base[:500,:,:,:], g2_air_stroke),axis=0)
 x_total=np.concatenate((x_total,g2_light_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_hard_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_tickle[:,:,:,:]), axis=0)
 #x_total=np.concatenate((x_total,g2_hit), axis=0)
+#x_total=np.concatenate((x_total,g2_hover[:,:,:,:]), axis=0)
+x_total=np.concatenate((x_total,g2_light_touch[:,:,:,:]), axis=0)
 
 
 #generate training labels
@@ -186,11 +194,18 @@ y_light_stroke=2*np.ones(g2_light_stroke.shape[0]) #creating y labels for massag
 y_hard_stroke=3*np.ones(g2_hard_stroke.shape[0])
 y_tickle=4*np.ones(g2_tickle[:,:,:,:].shape[0])
 #y_hit=5*np.ones(g2_hit.shape[0])
+#y_hover=5*np.ones(g2_hover[:,:,:,:].shape[0])
+y_light_touch=5*np.ones(g2_light_touch[:,:,:,:].shape[0])
+
+
 y_total=np.append(y_base,y_air_stroke) #creating final y by adding base and stroke
 y_total=np.append(y_total,y_light_stroke) #adding in massage
 y_total=np.append(y_total,y_hard_stroke)
 y_total=np.append(y_total,y_tickle)
 #y_total=np.append(y_total,y_hit)
+#y_total=np.append(y_total,y_hover)
+y_total=np.append(y_total,y_light_touch)
+
 
 y_all = to_categorical(y_total) #one hot encoding
 
@@ -201,13 +216,20 @@ c_air_stroke_t,g_air_stroke_t,g2_air_stroke_t=extract_data(air_stroke_file_t) #i
 c_light_stroke_t,g_light_stroke_t,g2_light_stroke_t=extract_data(light_stroke_file_t) #import x data for light stroke
 c_hard_stroke_t,g_hard_stroke_t,g2_hard_stroke_t=extract_data(hard_stroke_file_t)
 c_tickle_t,g_tickle_t,g2_tickle_t=extract_data(tickle_file_t)
-c_hit_t,g_hit_t,g2_hit_t=extract_data(hit_file_t)
+#c_hit_t,g_hit_t,g2_hit_t=extract_data(hit_file_t)
+#c_hover_t,g_hover_t,g2_hover_t=extract_data(hover_file_t)
+c_light_touch_t,g_light_touch_t,g2_light_touch_t=extract_data(light_touch_file_t)
+
+
 
 x_total_t=np.concatenate((g2_base_t[:100,:,:,:], g2_air_stroke_t),axis=0)
 x_total_t=np.concatenate((x_total_t,g2_light_stroke_t), axis=0)
 x_total_t=np.concatenate((x_total_t,g2_hard_stroke_t[:,:,:,:]), axis=0)
 x_total_t=np.concatenate((x_total_t,g2_tickle_t), axis=0)
 #x_total_t=np.concatenate((x_total_t,g2_hit_t), axis=0)
+#x_total_t=np.concatenate((x_total_t,g2_hover_t), axis=0)
+x_total_t=np.concatenate((x_total_t,g2_light_touch_t), axis=0)
+
 
 
 #generate test labels
@@ -218,11 +240,18 @@ y_light_stroke_t=2*np.ones(g2_light_stroke_t.shape[0]) #creating y labels for ma
 y_hard_stroke_t=3*np.ones(g2_hard_stroke_t[:,:,:,:].shape[0])
 y_tickle_t=4*np.ones(g2_tickle_t.shape[0])
 #y_hit_t=5*np.ones(g2_hit_t.shape[0])
+#y_hover_t=5*np.ones(g2_hover_t.shape[0])
+y_light_touch_t=5*np.ones(g2_light_touch_t.shape[0])
+
+
 y_total_t=np.append(y_base_t,y_air_stroke_t) #creating final y by adding base and stroke
 y_total_t=np.append(y_total_t,y_light_stroke_t) #adding in massage
 y_total_t=np.append(y_total_t,y_hard_stroke_t)
 y_total_t=np.append(y_total_t,y_tickle_t)
 #y_total_t=np.append(y_total_t,y_hit_t)
+#y_total_t=np.append(y_total_t,y_hover_t)
+y_total_t=np.append(y_total_t,y_light_touch_t)
+
 
 y_all_t = to_categorical(y_total_t) #one hot encoding
 
@@ -272,7 +301,7 @@ model.add(Dense(160,
 model.add(Dense(80, 
                 activation='relu'))
 
-model.add(Dense(5, 
+model.add(Dense(6, 
                 activation='softmax'))
 
 model.compile(optimizer='adam',
@@ -289,7 +318,7 @@ model.compile(optimizer='adam',
 #using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],16,10,window,1), y_train,
-                  epochs=3,
+                  epochs=8,
                   validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t))
 
 
@@ -433,6 +462,8 @@ while True:
         print("tickle")
     #elif(np.argmax(result)==5):
     #    print("OUCH!!")
+    elif(np.argmax(result)==5):
+        print("light_touch")
 #    data_raw=np.array(data_lis)
 #    baseline=np.mean(data_raw[0:3,:],axis=0)
 #    data=data_raw-baseline
