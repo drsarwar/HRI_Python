@@ -174,7 +174,7 @@ c_light_stroke,g_light_stroke,g2_light_stroke=extract_data(light_stroke_file) #i
 c_hard_stroke,g_hard_stroke,g2_hard_stroke=extract_data(hard_stroke_file)
 c_tickle,g_tickle,g2_tickle=extract_data(tickle_file)
 #c_hit,g_hit,g2_hit=extract_data(hit_file)
-#c_hover,g_hover,g2_hover=extract_data(hover_file)
+c_hover,g_hover,g2_hover=extract_data(hover_file)
 c_light_touch,g_light_touch,g2_light_touch=extract_data(light_touch_file)
 
 x_total=np.concatenate((g2_base[:500,:,:,:], g2_air_stroke),axis=0)
@@ -182,7 +182,7 @@ x_total=np.concatenate((x_total,g2_light_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_hard_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_tickle[:,:,:,:]), axis=0)
 #x_total=np.concatenate((x_total,g2_hit), axis=0)
-#x_total=np.concatenate((x_total,g2_hover[:,:,:,:]), axis=0)
+x_total=np.concatenate((x_total,g2_hover[:,:,:,:]), axis=0)
 x_total=np.concatenate((x_total,g2_light_touch[:,:,:,:]), axis=0)
 
 
@@ -194,8 +194,8 @@ y_light_stroke=2*np.ones(g2_light_stroke.shape[0]) #creating y labels for massag
 y_hard_stroke=3*np.ones(g2_hard_stroke.shape[0])
 y_tickle=4*np.ones(g2_tickle[:,:,:,:].shape[0])
 #y_hit=5*np.ones(g2_hit.shape[0])
-#y_hover=5*np.ones(g2_hover[:,:,:,:].shape[0])
-y_light_touch=5*np.ones(g2_light_touch[:,:,:,:].shape[0])
+y_hover=5*np.ones(g2_hover[:,:,:,:].shape[0])
+y_light_touch=6*np.ones(g2_light_touch[:,:,:,:].shape[0])
 
 
 y_total=np.append(y_base,y_air_stroke) #creating final y by adding base and stroke
@@ -203,7 +203,7 @@ y_total=np.append(y_total,y_light_stroke) #adding in massage
 y_total=np.append(y_total,y_hard_stroke)
 y_total=np.append(y_total,y_tickle)
 #y_total=np.append(y_total,y_hit)
-#y_total=np.append(y_total,y_hover)
+y_total=np.append(y_total,y_hover)
 y_total=np.append(y_total,y_light_touch)
 
 
@@ -217,7 +217,7 @@ c_light_stroke_t,g_light_stroke_t,g2_light_stroke_t=extract_data(light_stroke_fi
 c_hard_stroke_t,g_hard_stroke_t,g2_hard_stroke_t=extract_data(hard_stroke_file_t)
 c_tickle_t,g_tickle_t,g2_tickle_t=extract_data(tickle_file_t)
 #c_hit_t,g_hit_t,g2_hit_t=extract_data(hit_file_t)
-#c_hover_t,g_hover_t,g2_hover_t=extract_data(hover_file_t)
+c_hover_t,g_hover_t,g2_hover_t=extract_data(hover_file_t)
 c_light_touch_t,g_light_touch_t,g2_light_touch_t=extract_data(light_touch_file_t)
 
 
@@ -227,7 +227,7 @@ x_total_t=np.concatenate((x_total_t,g2_light_stroke_t), axis=0)
 x_total_t=np.concatenate((x_total_t,g2_hard_stroke_t[:,:,:,:]), axis=0)
 x_total_t=np.concatenate((x_total_t,g2_tickle_t), axis=0)
 #x_total_t=np.concatenate((x_total_t,g2_hit_t), axis=0)
-#x_total_t=np.concatenate((x_total_t,g2_hover_t), axis=0)
+x_total_t=np.concatenate((x_total_t,g2_hover_t), axis=0)
 x_total_t=np.concatenate((x_total_t,g2_light_touch_t), axis=0)
 
 
@@ -240,8 +240,8 @@ y_light_stroke_t=2*np.ones(g2_light_stroke_t.shape[0]) #creating y labels for ma
 y_hard_stroke_t=3*np.ones(g2_hard_stroke_t[:,:,:,:].shape[0])
 y_tickle_t=4*np.ones(g2_tickle_t.shape[0])
 #y_hit_t=5*np.ones(g2_hit_t.shape[0])
-#y_hover_t=5*np.ones(g2_hover_t.shape[0])
-y_light_touch_t=5*np.ones(g2_light_touch_t.shape[0])
+y_hover_t=5*np.ones(g2_hover_t.shape[0])
+y_light_touch_t=6*np.ones(g2_light_touch_t.shape[0])
 
 
 y_total_t=np.append(y_base_t,y_air_stroke_t) #creating final y by adding base and stroke
@@ -249,7 +249,7 @@ y_total_t=np.append(y_total_t,y_light_stroke_t) #adding in massage
 y_total_t=np.append(y_total_t,y_hard_stroke_t)
 y_total_t=np.append(y_total_t,y_tickle_t)
 #y_total_t=np.append(y_total_t,y_hit_t)
-#y_total_t=np.append(y_total_t,y_hover_t)
+y_total_t=np.append(y_total_t,y_hover_t)
 y_total_t=np.append(y_total_t,y_light_touch_t)
 
 
@@ -296,7 +296,7 @@ model.add(Dense(160,
 model.add(Dense(80, 
                 activation='relu'))
 
-model.add(Dense(6, 
+model.add(Dense(7, 
                 activation='softmax'))
 
 model.compile(optimizer='adam',
