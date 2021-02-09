@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/air_stroke.txt'
+path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/tickle.txt'
 pad_flag=True
 
 ###########################################
@@ -118,8 +118,13 @@ for n_win in range(g_data.shape[2]):
  
 
 plt.figure(1)
+plt.title('Tickle data',fontsize=20, fontweight = 'bold')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('Frame #',fontsize=15)
+plt.ylabel('Capacitance (Digitized values)',fontsize=15)
 for j in range(data.shape[1]):
-    plt.plot(data[:,j])
+    plt.plot(-data[:,j])
 
 #plt.figure(2)
 #for j in range(crop.shape[1]):

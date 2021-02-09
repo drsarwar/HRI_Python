@@ -33,8 +33,8 @@ from sklearn.metrics import plot_confusion_matrix
 import os
 from keras.callbacks import EarlyStopping
 
-window=8
-pad_flag=False
+window=6
+pad_flag=True
 
 def extract_data(d_file):
     file=open(d_file, 'r')
@@ -85,12 +85,12 @@ def extract_data(d_file):
             signal_cnt=signal_cnt+1
             base_cnt=0
             if ((pad_flag == True) and (signal_cnt==1)):
-                crop=np.append(crop,data[frm-4,:].reshape(1,-1),axis=0)
-                crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
+                #crop=np.append(crop,data[frm-4,:].reshape(1,-1),axis=0)
+                #crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm-2,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
-                signal_cnt=5            
+                signal_cnt=3            
             else:
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
             
@@ -222,8 +222,6 @@ c_tickle_t,g_tickle_t,g2_tickle_t=extract_data(tickle_file_t)
 c_hover_t,g_hover_t,g2_hover_t=extract_data(hover_file_t)
 c_light_touch_t,g_light_touch_t,g2_light_touch_t=extract_data(light_touch_file_t)
 
-
-
 x_total_t=np.concatenate((g2_base_t[:100,:,:,:], g2_air_stroke_t),axis=0)
 x_total_t=np.concatenate((x_total_t,g2_light_stroke_t), axis=0)
 x_total_t=np.concatenate((x_total_t,g2_hard_stroke_t[:,:,:,:]), axis=0)
@@ -316,7 +314,7 @@ model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-
+model.summary()
 #using validation data
 #history=model.fit(X_train.reshape(X_train.shape[0],16,10,5,1), y_train,
 #                  epochs=12,

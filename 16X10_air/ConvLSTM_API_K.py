@@ -25,14 +25,17 @@ from keras.layers import Dropout
 from tensorflow.keras import regularizers
 import matplotlib.pyplot as plt
 from keras.layers import Conv3D
+from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.utils import plot_model
 import sys, serial
 from keras.layers import BatchNormalization
 from keras.layers import ConvLSTM2D
+from keras.callbacks import EarlyStopping
 
-window=10
-pad_flag=True
+
+window=8
+pad_flag=False
 
 def extract_data(d_file):
     file=open(d_file, 'r')
@@ -260,17 +263,34 @@ X_train, X_test, y_train, y_test = train_test_split(
          x_total, y_all, test_size=0.1, random_state=1, stratify=y_total)
 
 
+e_stop=EarlyStopping(
+        monitor='accuracy',
+        patience=1,
+        min_delta=0.01,
+        mode='max')
+
 model=Sequential()
 
 model.add(ConvLSTM2D(30,
                      kernel_size=(3,3),
+                     strides=(1,1),
                      activation='relu',
+                     data_format='channels_last',
                      input_shape=(window,16,10,1),
+                     return_sequences = True,
                      padding='same'))
 
+model.add(ConvLSTM2D(30,
+                     kernel_size=(3,3),
+                     strides=(1,1),
+                     activation='relu',
+                     data_format='channels_last',
+                     padding='same'))
 
-#model.add(Conv2D(10,
-#                 kernel_size=2,
+#
+#model.add(Conv3D(1,
+#                 kernel_size=(3,3,3),
+#                 strides=(1, 1, 1),
 #                 activation='relu',
 #                 padding='same'))
 #model.add(Conv2D(10,
@@ -303,6 +323,7 @@ model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
+model.summary()
 #
 #history=model.fit(X_train.reshape(X_train.shape[0],5,16,10,1), y_train,
 #                  epochs=12,
@@ -310,8 +331,9 @@ model.compile(optimizer='adam',
 #using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],window,16,10,1), y_train,
-                  epochs=6,
-                  validation_data = (x_total_t.reshape(x_total_t.shape[0],window,16,10,1), y_all_t))
+                  epochs=10,
+                  validation_data = (x_total_t.reshape(x_total_t.shape[0],window,16,10,1), y_all_t),
+                  callbacks=[e_stop])
 
 
 
