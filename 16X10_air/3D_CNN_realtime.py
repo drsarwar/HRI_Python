@@ -31,9 +31,10 @@ import sys, serial
 from keras.layers import BatchNormalization
 from sklearn.metrics import plot_confusion_matrix
 import os
+from keras.callbacks import EarlyStopping
 
 window=8
-pad_flag=True
+pad_flag=False
 
 def extract_data(d_file):
     file=open(d_file, 'r')
@@ -84,11 +85,12 @@ def extract_data(d_file):
             signal_cnt=signal_cnt+1
             base_cnt=0
             if ((pad_flag == True) and (signal_cnt==1)):
-                #crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
+                crop=np.append(crop,data[frm-4,:].reshape(1,-1),axis=0)
+                crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm-2,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
-                signal_cnt=3            
+                signal_cnt=5            
             else:
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
             
@@ -259,6 +261,12 @@ y_all_t = to_categorical(y_total_t) #one hot encoding
 X_train, X_test, y_train, y_test = train_test_split(
          x_total, y_all, test_size=0.1, random_state=1, stratify=y_total)
 
+e_stop=EarlyStopping(
+        monitor='accuracy',
+        patience=1,
+        min_delta=0.01,
+        mode='max')
+
 model=Sequential()
 
 model.add(Conv3D(30,
@@ -318,8 +326,9 @@ model.compile(optimizer='adam',
 #using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],16,10,window,1), y_train,
-                  epochs=6,
-                  validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t))
+                  epochs=5,
+                  validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t),
+                  callbacks=[e_stop])
 
 
 
@@ -460,10 +469,14 @@ while True:
         print("hard_stroke")
     elif(np.argmax(result)==4):
         print("tickle")
-    #elif(np.argmax(result)==5):
-    #    print("OUCH!!")
     elif(np.argmax(result)==5):
+        print("hover")
+    elif(np.argmax(result)==6):
         print("light_touch")
+    
+    #print(time.time())
+        
+        
 #    data_raw=np.array(data_lis)
 #    baseline=np.mean(data_raw[0:3,:],axis=0)
 #    data=data_raw-baseline

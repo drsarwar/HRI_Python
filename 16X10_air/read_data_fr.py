@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/hit.txt'
+path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/air_stroke.txt'
 pad_flag=True
 
 ###########################################

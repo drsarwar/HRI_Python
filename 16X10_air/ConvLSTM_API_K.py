@@ -31,8 +31,8 @@ import sys, serial
 from keras.layers import BatchNormalization
 from keras.layers import ConvLSTM2D
 
-window=7
-pad_flag=False
+window=10
+pad_flag=True
 
 def extract_data(d_file):
     file=open(d_file, 'r')
@@ -310,7 +310,7 @@ model.compile(optimizer='adam',
 #using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],window,16,10,1), y_train,
-                  epochs=8,
+                  epochs=6,
                   validation_data = (x_total_t.reshape(x_total_t.shape[0],window,16,10,1), y_all_t))
 
 
@@ -457,7 +457,7 @@ while True:
         print("hard_stroke")
     elif(np.argmax(result)==4):
         print("tickle")
-    #elif(np.argmax(result)==5):
-    #    print("OUCH!!")
     elif(np.argmax(result)==5):
+        print("hover")
+    elif(np.argmax(result)==6):
         print("light_touch")
