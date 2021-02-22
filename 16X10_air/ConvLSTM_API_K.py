@@ -34,7 +34,7 @@ from keras.layers import ConvLSTM2D
 from keras.callbacks import EarlyStopping
 
 
-window=8
+window=10
 pad_flag=False
 
 def extract_data(d_file):
@@ -266,12 +266,14 @@ X_train, X_test, y_train, y_test = train_test_split(
 e_stop=EarlyStopping(
         monitor='accuracy',
         patience=1,
-        min_delta=0.01,
+        verbose=1,
+        min_delta=0.0001,
+        restore_best_weights = True,
         mode='max')
 
 model=Sequential()
 
-model.add(ConvLSTM2D(30,
+model.add(ConvLSTM2D(50,
                      kernel_size=(3,3),
                      strides=(1,1),
                      activation='relu',
@@ -280,7 +282,7 @@ model.add(ConvLSTM2D(30,
                      return_sequences = True,
                      padding='same'))
 
-model.add(ConvLSTM2D(30,
+model.add(ConvLSTM2D(50,
                      kernel_size=(3,3),
                      strides=(1,1),
                      activation='relu',
@@ -304,22 +306,22 @@ model.add(Flatten())
 
 #model.add(Dense(64, 
 #                activation='relu'))
-model.add(Dense(320, 
-                activation='relu'))
-#model.add(BatchNormalization())
-
-model.add(Dense(160, 
-                activation='relu'))
-#model.add(BatchNormalization())
-
-
 model.add(Dense(80, 
+                activation='relu'))
+#model.add(BatchNormalization())
+
+model.add(Dense(40, 
+                activation='relu'))
+#model.add(BatchNormalization())
+
+
+model.add(Dense(20, 
                 activation='relu'))
 
 model.add(Dense(7, 
                 activation='softmax'))
-
-model.compile(optimizer='adam',
+opt=keras.optimizers.Adam(learning_rate=0.0005)
+model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
@@ -331,9 +333,19 @@ model.summary()
 #using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],window,16,10,1), y_train,
-                  epochs=10,
+                  epochs=30,
                   validation_data = (x_total_t.reshape(x_total_t.shape[0],window,16,10,1), y_all_t),
                   callbacks=[e_stop])
+
+
+test_result = model.evaluate(x_total_t.reshape(x_total_t.shape[0],window,16,10,1), y_all_t)
+htry=history.history
+
+pred=model.predict(x_total_t.reshape(x_total_t.shape[0],window,16,10,1))
+
+y_true=np.array(tf.argmax(y_all_t,axis=1))
+y_pred=np.array(tf.argmax(pred, axis=1))
+cm=np.array(tf.math.confusion_matrix(y_true, y_pred))
 
 
 
@@ -363,12 +375,6 @@ plt.ylabel('Accuracy')
 plt.legend()
 plt.show()
 
-
-pred=model.predict(x_total_t.reshape(x_total_t.shape[0],window,16,10,1))
-
-y_true=np.array(tf.argmax(y_all_t,axis=1))
-y_pred=np.array(tf.argmax(pred, axis=1))
-cm=np.array(tf.math.confusion_matrix(y_true, y_pred))
 
 
 #--------------------------------------------------------------

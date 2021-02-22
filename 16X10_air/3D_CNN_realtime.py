@@ -33,8 +33,8 @@ from sklearn.metrics import plot_confusion_matrix
 import os
 from keras.callbacks import EarlyStopping
 
-window=6
-pad_flag=True
+window=10
+pad_flag=False
 
 def extract_data(d_file):
     file=open(d_file, 'r')
