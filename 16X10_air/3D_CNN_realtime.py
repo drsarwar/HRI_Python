@@ -257,7 +257,7 @@ y_all_t = to_categorical(y_total_t) #one hot encoding
 
 
 X_train, X_test, y_train, y_test = train_test_split(
-         x_total, y_all, test_size=0.1, random_state=1, stratify=y_total)
+         x_total, y_all, test_size=0.01, random_state=1, stratify=y_total)
 
 e_stop=EarlyStopping(
         monitor='accuracy',
@@ -324,7 +324,7 @@ model.summary()
 #using test data
 
 history=model.fit(X_train.reshape(X_train.shape[0],16,10,window,1), y_train,
-                  epochs=5,
+                  epochs=10,
                   validation_data = (x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t),
                   callbacks=[e_stop])
 

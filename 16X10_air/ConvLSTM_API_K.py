@@ -306,21 +306,23 @@ model.add(Flatten())
 
 #model.add(Dense(64, 
 #                activation='relu'))
-model.add(Dense(80, 
-                activation='relu'))
-#model.add(BatchNormalization())
-
 model.add(Dense(40, 
                 activation='relu'))
 #model.add(BatchNormalization())
 
-
 model.add(Dense(20, 
                 activation='relu'))
+#model.add(BatchNormalization())
+
+
+model.add(Dense(10, 
+                activation='relu'))
+
+
 
 model.add(Dense(7, 
                 activation='softmax'))
-opt=keras.optimizers.Adam(learning_rate=0.0005)
+opt=keras.optimizers.Adam(learning_rate=0.0001)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])

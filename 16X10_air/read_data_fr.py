@@ -10,7 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/tickle.txt'
+
+path='/Users/saquib/Desktop/screenlog.txt'
+#path='/Users/saquib/Documents/Research/HRI/HRI_Python/16X10_air/tickle.txt'
 pad_flag=True
 
 ###########################################
@@ -43,7 +45,7 @@ for i in range(data.shape[0]-5):
 ##############################################################################
 
 file=open(path, 'r')
-window=5
+window=10
 lines=file.readlines()
 
 data_lis=[] #this is a list that holds the entire dataset frame# X 160
@@ -123,16 +125,17 @@ plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
 plt.xlabel('Frame #',fontsize=15)
 plt.ylabel('Capacitance (Digitized values)',fontsize=15)
+
 for j in range(data.shape[1]):
     plt.plot(-data[:,j])
 
-#plt.figure(2)
-#for j in range(crop.shape[1]):
-#    plt.plot(crop[:,j])
-#
-#plt.figure(3)
-#for j in range(g_data.shape[0]):
-#    plt.plot(g_data[j,:,11])
+plt.figure(2)
+for j in range(crop.shape[1]):
+    plt.plot(crop[:,j])
+
+plt.figure(3)
+for j in range(g_data.shape[0]):
+    plt.plot(g_data[j,:,11])
 
 D2_data=np.zeros(shape=(data.shape[0],16,10))
 for n_ in range(data.shape[0]):
