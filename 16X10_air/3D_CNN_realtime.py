@@ -262,8 +262,10 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 e_stop=EarlyStopping(
         monitor='accuracy',
+        verbose = 1,
         patience=1,
         min_delta=0.001,
+        restore_best_weights = 'True',
         mode='max')
 
 model=Sequential()
@@ -357,6 +359,10 @@ plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.legend()
 plt.show()
+
+
+test_result = model.evaluate(x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t)
+
 
 pred=model.predict(x_total_t.reshape(x_total_t.shape[0],16,10,window,1))
 
