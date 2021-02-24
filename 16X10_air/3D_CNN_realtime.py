@@ -98,13 +98,14 @@ def extract_data(d_file):
         if ((signal_flag==True) and (signal_cnt>window)):
             g_data=np.dstack((g_data,crop_t[:,-window:]))
     
-    g2_data=np.zeros(shape=(g_data.shape[2],16,10,window))
+    g2_data=np.zeros(shape=(g_data.shape[2]-1,16,10,window)) #adding the -1 to get rid of the first frame
     
-    for n_win in range(g_data.shape[2]):
+    for n_win in range(g_data.shape[2]-1): #adding a -1 to get rid of the first frame
         for n_frm in range(window):
             for y_frm in range(16):
                 for x_frm in range(10):
-                    g2_data[n_win,y_frm,x_frm,n_frm]=g_data[(x_frm+10*y_frm),n_frm,n_win]
+                    g2_data[n_win,y_frm,x_frm,n_frm]=g_data[(x_frm+10*y_frm),n_frm,n_win+1] #added the +1 in n_win to get rid
+                                                                                            #of the first frame 
     
     g_data_2D=g2_data/256
     #g_data_2D=g_data_scaled.reshape(g_data.shape[0],16,10,g_data.shape[2])    
@@ -262,7 +263,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 e_stop=EarlyStopping(
         monitor='accuracy',
         patience=1,
-        min_delta=0.01,
+        min_delta=0.001,
         mode='max')
 
 model=Sequential()
@@ -362,6 +363,15 @@ pred=model.predict(x_total_t.reshape(x_total_t.shape[0],16,10,window,1))
 y_true=np.array(tf.argmax(y_all_t,axis=1))
 y_pred=np.array(tf.argmax(pred, axis=1))
 cm=np.array(tf.math.confusion_matrix(y_true, y_pred))
+
+
+
+
+pred_HS=model.predict(g2_hard_stroke_t.reshape(g2_hard_stroke_t.shape[0],16,10,window,1))
+
+y_true_HS=np.array(tf.argmax(y_hard_stroke_t))
+y_pred_HS=np.array(tf.argmax(pred_HS, axis=1))
+cm_HS=np.array(tf.math.confusion_matrix(y_true_HS, y_pred_HS))
 
 
 strPort = '/dev/cu.usbserial-FTBS2SJQ'
