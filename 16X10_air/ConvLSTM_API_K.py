@@ -86,11 +86,13 @@ def extract_data(d_file):
             signal_cnt=signal_cnt+1
             base_cnt=0
             if ((pad_flag == True) and (signal_cnt==1)):
+                #crop=np.append(crop,data[frm-4,:].reshape(1,-1),axis=0)
                 #crop=np.append(crop,data[frm-3,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm-2,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
-                signal_cnt=3            
+                signal_cnt=3  
+                #signal_cnt=5
             else:
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
             
@@ -98,13 +100,13 @@ def extract_data(d_file):
         if ((signal_flag==True) and (signal_cnt>window)):
             g_data=np.dstack((g_data,crop_t[:,-window:]))
     
-    g2_data=np.zeros(shape=(g_data.shape[2],window,16,10))
+    g2_data=np.zeros(shape=(g_data.shape[2]-1,window,16,10))
     
-    for n_win in range(g_data.shape[2]):
+    for n_win in range(g_data.shape[2]-1):
         for n_frm in range(window):
             for y_frm in range(16):
                 for x_frm in range(10):
-                    g2_data[n_win,n_frm,y_frm,x_frm]=g_data[(x_frm+10*y_frm),n_frm,n_win]
+                    g2_data[n_win,n_frm,y_frm,x_frm]=g_data[(x_frm+10*y_frm),n_frm,n_win+1]
     
     g_data_2D=g2_data/256
     #g_data_2D=g_data_scaled.reshape(g_data.shape[0],16,10,g_data.shape[2])    
@@ -185,7 +187,7 @@ x_total=np.concatenate((x_total,g2_light_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_hard_stroke), axis=0)
 x_total=np.concatenate((x_total,g2_tickle[:,:,:,:]), axis=0)
 #x_total=np.concatenate((x_total,g2_hit), axis=0)
-x_total=np.concatenate((x_total,g2_hover[:,:,:,:]), axis=0)
+x_total=np.concatenate((x_total,g2_hover[:1000,:,:,:]), axis=0)
 x_total=np.concatenate((x_total,g2_light_touch[:,:,:,:]), axis=0)
 
 
@@ -197,7 +199,7 @@ y_light_stroke=2*np.ones(g2_light_stroke.shape[0]) #creating y labels for massag
 y_hard_stroke=3*np.ones(g2_hard_stroke.shape[0])
 y_tickle=4*np.ones(g2_tickle[:,:,:,:].shape[0])
 #y_hit=5*np.ones(g2_hit.shape[0])
-y_hover=5*np.ones(g2_hover[:,:,:,:].shape[0])
+y_hover=5*np.ones(g2_hover[:1000,:,:,:].shape[0])
 y_light_touch=6*np.ones(g2_light_touch[:,:,:,:].shape[0])
 
 
@@ -267,13 +269,13 @@ e_stop=EarlyStopping(
         monitor='accuracy',
         patience=1,
         verbose=1,
-        min_delta=0.0001,
-        restore_best_weights = True,
+        min_delta=0.001,
+    #    restore_best_weights = True,
         mode='max')
 
 model=Sequential()
 
-model.add(ConvLSTM2D(50,
+model.add(ConvLSTM2D(30,
                      kernel_size=(3,3),
                      strides=(1,1),
                      activation='relu',
@@ -282,7 +284,7 @@ model.add(ConvLSTM2D(50,
                      return_sequences = True,
                      padding='same'))
 
-model.add(ConvLSTM2D(50,
+model.add(ConvLSTM2D(30,
                      kernel_size=(3,3),
                      strides=(1,1),
                      activation='relu',
@@ -306,23 +308,23 @@ model.add(Flatten())
 
 #model.add(Dense(64, 
 #                activation='relu'))
-model.add(Dense(40, 
+model.add(Dense(320, 
                 activation='relu'))
 #model.add(BatchNormalization())
 
-model.add(Dense(20, 
+model.add(Dense(160, 
                 activation='relu'))
 #model.add(BatchNormalization())
 
 
-model.add(Dense(10, 
+model.add(Dense(80, 
                 activation='relu'))
 
 
 
 model.add(Dense(7, 
                 activation='softmax'))
-opt=keras.optimizers.Adam(learning_rate=0.0001)
+opt=keras.optimizers.Adam(learning_rate=0.001)
 model.compile(optimizer=opt,
               loss='categorical_crossentropy',
               metrics=['accuracy'])

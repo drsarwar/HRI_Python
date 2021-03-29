@@ -90,7 +90,8 @@ def extract_data(d_file):
                 crop=np.append(crop,data[frm-2,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm-1,:].reshape(1,-1),axis=0)
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
-                signal_cnt=3            
+                signal_cnt=3           
+                #signal_cnt=5
             else:
                 crop=np.append(crop,data[frm,:].reshape(1,-1),axis=0)
             
@@ -265,7 +266,7 @@ e_stop=EarlyStopping(
         verbose = 1,
         patience=1,
         min_delta=0.001,
-        restore_best_weights = 'True',
+#        restore_best_weights = 'True',
         mode='max')
 
 model=Sequential()
@@ -332,6 +333,15 @@ history=model.fit(X_train.reshape(X_train.shape[0],16,10,window,1), y_train,
                   callbacks=[e_stop])
 
 
+test_result = model.evaluate(x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t)
+
+
+pred=model.predict(x_total_t.reshape(x_total_t.shape[0],16,10,window,1))
+
+y_true=np.array(tf.argmax(y_all_t,axis=1))
+y_pred=np.array(tf.argmax(pred, axis=1))
+cm=np.array(tf.math.confusion_matrix(y_true, y_pred))
+
 
 #
 
@@ -360,15 +370,6 @@ plt.ylabel('Accuracy')
 plt.legend()
 plt.show()
 
-
-test_result = model.evaluate(x_total_t.reshape(x_total_t.shape[0],16,10,window,1), y_all_t)
-
-
-pred=model.predict(x_total_t.reshape(x_total_t.shape[0],16,10,window,1))
-
-y_true=np.array(tf.argmax(y_all_t,axis=1))
-y_pred=np.array(tf.argmax(pred, axis=1))
-cm=np.array(tf.math.confusion_matrix(y_true, y_pred))
 
 
 
@@ -480,7 +481,7 @@ while True:
     elif(np.argmax(result)==2):
         print("light_stroke")
     elif(np.argmax(result)==3):
-        print("hard_stroke")
+        print("rub")
     elif(np.argmax(result)==4):
         print("tickle")
     elif(np.argmax(result)==5):
